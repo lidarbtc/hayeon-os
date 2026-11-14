@@ -1,47 +1,70 @@
 # HaYeon OS
 
-hayeon.eth에 설치된 작은 운영체제. tripleS S19 정하연의 색(Medium Turquoise)으로 칠한
-Windows XP / 7 풍 바탕화면을 서버 없이 정적 페이지 하나로 띄운다.
+A small fan-made operating system that lives at [hayeon.eth](https://hayeon.eth.limo).
 
-팬이 만든 비공식 작품이다.
+It is a single static page that boots into a Windows XP / 7 style desktop, painted in
+Medium Turquoise (`#52D9BB`), the colour of tripleS S19 Jeong HaYeon. There is no server:
+one build, pinned to IPFS, and everything you save stays in your browser.
 
-## 개발
+Unofficial fan work. Not affiliated with MODHAUS or tripleS.
+
+## What's inside
+
+- Boot, welcome and shutdown screens
+- Windows you can drag, resize, minimize and maximize, with a taskbar and a start menu
+- **My Pictures**: a photo viewer with a slideshow; any photo can become the wallpaper
+- **Profile**: HaYeon's profile and timeline
+- Desktop gadgets: a photo frame and a birthday countdown
+- Notepad, My Computer and a Recycle Bin, backed by `localStorage`
+- Hedgehog Finder, a minesweeper with hedgehogs
+- Media Player, with three tunes synthesised live by Web Audio
+- A terminal (try `help`)
+- Control Panel: two themes, four wallpapers and a gravity switch
+
+The interface is in Korean. All icons and wallpapers are hand-drawn SVG.
+
+## Development
+
+Requires Node 20.19 or newer.
 
 ~~~bash
 pnpm install
-pnpm dev      # 개발 서버
-pnpm check    # 타입 검사
-pnpm build    # dist/ 에 정적 파일 생성
+pnpm dev      # dev server
+pnpm check    # type check
+pnpm build    # static files in dist/
 ~~~
 
-빌드 결과는 모든 경로가 상대경로라서 IPFS 게이트웨이의 하위 경로(/ipfs/CID/)에서도 그대로 열린다.
+## Adding photos
 
-## 구조
+1. Drop images into `photos/inbox/` (git-ignored).
+2. Run `pnpm photos` (needs ImageMagick 7). It writes web-sized copies to `public/photos/`
+   and adds an entry for each new image to `src/lib/os/photos.json`.
+3. Fill in the title, album, date, caption and credit in `photos.json`.
 
-- src/lib/os — 세션 단계(부팅, 환영 화면, 바탕화면, 종료), 창 관리, 파일 저장소, 설정,
-  고슴도치 찾기 규칙, 미디어 플레이어의 곡과 합성기
-- src/lib/shell — 바탕화면, 창, 작업표시줄, 시작 메뉴
-- src/lib/screens — 부팅, 환영, 종료 화면
-- src/lib/apps — 창 안에 들어가는 프로그램(메모장, 내 컴퓨터, 휴지통, 시스템 속성, 고슴도치 찾기,
-  미디어 플레이어, 터미널, 제어판, 대화상자).
-  새 프로그램은 src/lib/os/apps.ts 에 등록하고, 바로가기는 src/lib/os/shell.ts 에 추가한다
-- src/lib/ui — 아이콘, 로고, 배경화면(전부 직접 그린 SVG)과 메뉴 표시줄, 파일 목록
+Two optional fields: `focus` is a CSS `object-position` that keeps the subject in view when a
+photo is cropped, and `avatar: true` marks the photo used on the welcome screen.
 
-## 파일
+## Deployment
 
-메모장으로 저장한 글은 C:\내 문서에 들어가고 브라우저의 localStorage(hayeon-os:files:v1)에만 남는다.
-지운 파일은 휴지통으로 가며, 휴지통을 비우면 완전히 사라진다. 드라이브와 시스템 폴더는
-src/lib/os/disk.ts 에 적힌 읽기 전용 구조다.
+`dist/` is plain static files with relative paths, so it works from any host and under
+an IPFS gateway path such as `/ipfs/<cid>/`.
 
-## 설정과 기록
+hayeon.eth is deployed by 4EVERLAND on every push to `main` (Vite preset,
+`npm run build`, output `dist`, Node 20+). The ENS content hash points at the
+project's IPNS name, so the name follows each new build.
 
-제어판에서 고른 테마(에어로, 루나)와 배경 화면은 hayeon-os:settings:v1 에, 고슴도치 찾기의
-최고 기록은 hayeon-os:hog:v1 에 남는다. 둘 다 localStorage 라서 브라우저마다 따로다.
-중력은 저장하지 않아서 새로 들어오면 꺼져 있다.
+## Layout
 
-미디어 플레이어의 곡은 음원 파일 없이 WebAudio 로 그 자리에서 합성한다.
+| Path | Contents |
+| --- | --- |
+| `src/lib/os` | Session, window manager, file store, settings, photo list, game rules, synth |
+| `src/lib/shell` | Desktop, windows, taskbar, start menu, gadgets |
+| `src/lib/screens` | Boot, welcome and shutdown screens |
+| `src/lib/apps` | The programs. Register new ones in `src/lib/os/apps.ts` |
+| `src/lib/ui` | Icons, wallpapers and shared widgets |
+| `scripts/photos.mjs` | The photo importer |
 
-## 배포
+## License
 
-빌드에는 Node 20.19 이상이 필요하다(Vite 8). 4EVERLAND 같은 빌더에서는 Node 버전을 20 이상으로,
-빌드 명령을 npm run build, 출력 폴더를 dist 로 맞춘다.
+Code is under [Apache-2.0](LICENSE). The photos in `public/photos` are not part of that
+licence; each belongs to its author under the terms listed in [photos/CREDITS.md](photos/CREDITS.md).

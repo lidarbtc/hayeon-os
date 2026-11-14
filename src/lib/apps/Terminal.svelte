@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { REPO_URL } from '../os/about';
   import { BUILD_TIME, DOCUMENTS, displayPath, drives, staticFolder } from '../os/disk';
   import { fileSize, fs } from '../os/fs.svelte';
   import { usesMouse } from '../os/pointer';
@@ -146,6 +147,8 @@
 
   const programs: [string[], Shortcut][] = [
     [['notepad', '메모장'], shortcuts.notepad],
+    [['photos', '사진', '내 사진'], shortcuts.photos],
+    [['profile', '프로필'], shortcuts.profile],
     [['hedgehog', '고슴도치', '고슴도치 찾기'], shortcuts.hedgehog],
     [['player', '미디어', '미디어 플레이어'], shortcuts.player],
     [['control', '제어판'], shortcuts.control],
@@ -196,6 +199,7 @@
     '  TIME      지금 시각을 알려 줍니다.',
     '  THEME     테마를 바꿉니다. 예: theme luna',
     '  GRAVITY   중력을 켜고 끕니다. 예: gravity on',
+    '  SOURCE    소스 코드가 있는 곳을 알려 줍니다.',
     '  CLS       화면을 지웁니다.',
     '  EXIT      터미널을 닫습니다.',
     ''
@@ -219,6 +223,7 @@
     time: () => print(new Intl.DateTimeFormat('ko-KR', { timeStyle: 'medium' }).format(new Date())),
     theme,
     gravity,
+    source: () => print(REPO_URL),
     cls: () => (lines = []),
     clear: () => (lines = []),
     exit: () => wm.requestClose(win.id),

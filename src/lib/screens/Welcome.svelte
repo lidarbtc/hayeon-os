@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Avatar from '../ui/Avatar.svelte';
   import Icon from '../ui/Icon.svelte';
   import Orb from '../ui/Orb.svelte';
   import { session } from '../os/session.svelte';
@@ -21,7 +22,7 @@
       <div class="entering" role="status"><span class="spinner"></span>환영합니다</div>
     {:else}
       <button class="user" onclick={enter}>
-        <span class="avatar"><Icon name="hedgehog" size={96} /></span>
+        <span class="avatar"><Avatar size={118} /></span>
         <span class="name">hayeon.eth</span>
         <span class="hint">눌러서 시작하기</span>
       </button>

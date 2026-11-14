@@ -4,6 +4,8 @@ import Explorer from '../apps/Explorer.svelte';
 import HedgehogFinder from '../apps/HedgehogFinder.svelte';
 import MediaPlayer from '../apps/MediaPlayer.svelte';
 import Notepad from '../apps/Notepad.svelte';
+import PhotoViewer from '../apps/PhotoViewer.svelte';
+import Profile from '../apps/Profile.svelte';
 import RecycleBin from '../apps/RecycleBin.svelte';
 import SystemProperties from '../apps/SystemProperties.svelte';
 import Terminal from '../apps/Terminal.svelte';
@@ -94,6 +96,26 @@ registerApps([
     minWidth: 452,
     minHeight: 540,
     resizable: false
+  },
+  {
+    id: 'photos',
+    title: '사진 뷰어',
+    icon: 'pictures',
+    component: PhotoViewer,
+    width: 720,
+    height: 540,
+    minWidth: 300,
+    minHeight: 260
+  },
+  {
+    id: 'profile',
+    title: '정하연 - 프로필',
+    icon: 'profile',
+    component: Profile,
+    width: 430,
+    height: 560,
+    minWidth: 300,
+    minHeight: 260
   },
   {
     id: 'dialog',

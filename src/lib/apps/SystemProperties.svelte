@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { REPO_LABEL, REPO_URL } from '../os/about';
   import { wm, type Win } from '../os/wm.svelte';
   import Icon from '../ui/Icon.svelte';
   import Orb from '../ui/Orb.svelte';
@@ -50,6 +51,8 @@
         <dd>hayeon.eth</dd>
         <dt>테마 색</dt>
         <dd><i class="swatch"></i>Medium Turquoise #52D9BB</dd>
+        <dt>소스 코드</dt>
+        <dd><a href={REPO_URL} target="_blank" rel="noopener noreferrer">{REPO_LABEL}</a></dd>
       </dl>
     {:else if tab === '컴퓨터 이름'}
       <p class="lead">
@@ -190,6 +193,10 @@
 
   dd {
     margin: 0;
+  }
+
+  dd a {
+    color: #0b6f7d;
   }
 
   .swatch {

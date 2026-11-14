@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { settings, type WallpaperName } from '../os/settings.svelte';
+  import { settings, type Scene } from '../os/settings.svelte';
 
-  let { name, still = false }: { name?: WallpaperName; still?: boolean } = $props();
+  let { name, still = false }: { name?: Scene; still?: boolean } = $props();
   const uid = $props.id();
-  const scene = $derived(name ?? settings.wallpaper);
+  const scene = $derived(name ?? (settings.wallpaper === 'photo' ? 'hill' : settings.wallpaper));
 
   const palettes = {
     hill: {

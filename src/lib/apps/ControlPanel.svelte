@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { settings, type Theme, type WallpaperName } from '../os/settings.svelte';
+  import { photoById, photos, thumbUrl } from '../os/photos.svelte';
+  import { settings, type Scene, type Theme } from '../os/settings.svelte';
   import { wm, type Win } from '../os/wm.svelte';
   import Wallpaper from '../ui/Wallpaper.svelte';
 
@@ -10,11 +11,14 @@
     { id: 'luna', label: '루나', note: '또렷한 색의 창' }
   ];
 
-  const wallpapers: { id: WallpaperName; label: string }[] = [
+  const wallpapers: { id: Scene; label: string }[] = [
     { id: 'hill', label: '언덕' },
     { id: 'night', label: '밤 언덕' },
     { id: 'aqua', label: '물결' }
   ];
+
+  // The picture last chosen in the viewer, or the first one until then.
+  const picture = $derived(photoById(settings.wallpaperPhoto) ?? photos[0]);
 
   function monday() {
     wm.dialog({
@@ -60,6 +64,37 @@
           <strong>{paper.label}</strong>
         </button>
       {/each}
+      {#if picture}
+        <button
+          class="choice"
+          class:current={settings.wallpaper === 'photo'}
+          aria-pressed={settings.wallpaper === 'photo'}
+          onclick={() => settings.setPhotoWallpaper(picture.id)}
+        >
+          <span class="preview"><img src={thumbUrl(picture)} alt="" style:object-position={picture.focus} /></span>
+          <strong>사진</strong>
+        </button>
+      {/if}
+    </div>
+    {#if picture}
+      <small class="hint">다른 사진은 내 사진에서 열고 “바탕 화면으로”를 누르면 됩니다.</small>
+    {/if}
+  </section>
+
+  <section>
+    <h3>가젯</h3>
+    <div class="row">
+      <div>
+        <strong>바탕 화면 가젯</strong>
+        <small>사진 액자와 D-day를 오른쪽에 둡니다.</small>
+      </div>
+      <button
+        class="switch"
+        role="switch"
+        aria-label="가젯"
+        aria-checked={settings.gadgets}
+        onclick={() => settings.setGadgets(!settings.gadgets)}><i></i></button
+      >
     </div>
   </section>
 
@@ -163,6 +198,17 @@
     border-radius: 2px;
     overflow: hidden;
     background: linear-gradient(180deg, #0a7fb6, #2bbfd2 45%, #7fe8d2 70%, #6fdc74 71%, #0d947d);
+  }
+
+  .preview img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hint {
+    margin: 6px 2px 0;
   }
 
   /* A tiny window in each theme's style. */

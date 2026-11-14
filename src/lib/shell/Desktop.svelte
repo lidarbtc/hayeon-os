@@ -6,8 +6,9 @@
   import { settings } from '../os/settings.svelte';
   import { shortcuts, type Shortcut } from '../os/shell';
   import { wm } from '../os/wm.svelte';
+  import Backdrop from '../ui/Backdrop.svelte';
   import Icon from '../ui/Icon.svelte';
-  import Wallpaper from '../ui/Wallpaper.svelte';
+  import Gadgets from './Gadgets.svelte';
   import StartMenu from './StartMenu.svelte';
   import Taskbar from './Taskbar.svelte';
   import Window from './Window.svelte';
@@ -15,6 +16,8 @@
   const icons: Shortcut[] = [
     shortcuts.computer,
     shortcuts.documents,
+    shortcuts.photos,
+    shortcuts.profile,
     shortcuts.bin,
     shortcuts.notepad,
     shortcuts.hedgehog,
@@ -66,7 +69,7 @@
 </script>
 
 <div class="desktop" data-theme={settings.theme}>
-  <Wallpaper />
+  <Backdrop />
 
   <div class="workarea" bind:clientWidth={areaWidth} bind:clientHeight={areaHeight}>
     <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -83,6 +86,10 @@
         </button>
       {/each}
     </div>
+
+    {#if settings.gadgets && areaWidth >= 900}
+      <Gadgets />
+    {/if}
 
     {#each wm.windows as win (win.id)}
       {@const App = getApp(win.appId).component}

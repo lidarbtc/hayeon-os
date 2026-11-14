@@ -1,9 +1,13 @@
 <script lang="ts">
+  import { REPO_URL } from '../os/about';
   import { session, type LeaveMode } from '../os/session.svelte';
   import { shortcuts, type Shortcut } from '../os/shell';
+  import Avatar from '../ui/Avatar.svelte';
   import Icon from '../ui/Icon.svelte';
 
   const programs: Shortcut[] = [
+    shortcuts.photos,
+    shortcuts.profile,
     shortcuts.notepad,
     shortcuts.hedgehog,
     shortcuts.player,
@@ -48,7 +52,7 @@
   </div>
 
   <div class="side">
-    <div class="avatar"><Icon name="hedgehog" size={50} /></div>
+    <div class="avatar"><Avatar size={60} /></div>
     <div class="who">
       <strong>hayeon.eth</strong>
       <span>S19 · 정하연</span>
@@ -60,6 +64,9 @@
   </div>
 
   <div class="power">
+    <a class="source" href={REPO_URL} target="_blank" rel="noopener noreferrer" role="menuitem" title="소스 코드">
+      <Icon name="github" size={14} />GitHub
+    </a>
     <button role="menuitem" onclick={() => leave('logoff')}><Icon name="logoff" size={15} />로그오프</button>
     <button role="menuitem" onclick={() => leave('restart')}><Icon name="restart" size={15} />다시 시작</button>
     <button role="menuitem" class="shutdown" onclick={() => leave('shutdown')}>
@@ -223,6 +230,29 @@
   .power .shutdown:focus-visible {
     border-color: rgba(90, 20, 10, 0.8);
     background: linear-gradient(180deg, #ffc0b3, #f0624a 46%, #dc3418 50%, #ff9a70);
+  }
+
+  /* A quiet link to the source, pushed to the far side of the power buttons. */
+  .source {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-right: auto;
+    padding: 4px 8px 4px 5px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    color: inherit;
+    font-size: 12px;
+    text-decoration: none;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    opacity: 0.8;
+  }
+
+  .source:hover,
+  .source:focus-visible {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.5);
+    opacity: 1;
   }
 
   :global([data-theme='luna']) .start-menu {

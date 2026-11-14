@@ -37,6 +37,22 @@ export interface Shortcut {
 export const shortcuts = {
   computer: { id: 'computer', label: '내 컴퓨터', icon: 'computer', open: () => openFolder('') },
   documents: { id: 'documents', label: '내 문서', icon: 'folder', open: () => openFolder(DOCUMENTS) },
+  photos: {
+    id: 'photos',
+    label: '내 사진',
+    icon: 'pictures',
+    open: () => {
+      wm.open('photos');
+    }
+  },
+  profile: {
+    id: 'profile',
+    label: '프로필',
+    icon: 'profile',
+    open: () => {
+      wm.open('profile');
+    }
+  },
   bin: {
     id: 'bin',
     label: '휴지통',

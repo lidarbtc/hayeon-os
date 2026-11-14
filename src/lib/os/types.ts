@@ -15,6 +15,9 @@ export type IconName =
   | 'player'
   | 'terminal'
   | 'control'
+  | 'pictures'
+  | 'profile'
+  | 'github'
   | 'error'
   | 'question'
   | 'info'
@@ -34,6 +37,8 @@ export type AppId =
   | 'player'
   | 'terminal'
   | 'control'
+  | 'photos'
+  | 'profile'
   | 'dialog';
 
 export interface AppDef {
