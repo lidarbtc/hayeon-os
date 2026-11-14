@@ -18,8 +18,15 @@ pnpm build    # dist/ 에 정적 파일 생성
 
 ## 구조
 
-- src/lib/os — 세션 단계(부팅, 환영 화면, 바탕화면, 종료)와 창 관리 상태
+- src/lib/os — 세션 단계(부팅, 환영 화면, 바탕화면, 종료), 창 관리, 파일 저장소
 - src/lib/shell — 바탕화면, 창, 작업표시줄, 시작 메뉴
 - src/lib/screens — 부팅, 환영, 종료 화면
-- src/lib/apps — 창 안에 들어가는 프로그램. 새 프로그램은 src/lib/os/apps.ts 에 등록한다
-- src/lib/ui — 아이콘, 로고, 배경화면 (전부 직접 그린 SVG)
+- src/lib/apps — 창 안에 들어가는 프로그램(메모장, 내 컴퓨터, 휴지통, 시스템 속성, 대화상자).
+  새 프로그램은 src/lib/os/apps.ts 에 등록하고, 바로가기는 src/lib/os/shell.ts 에 추가한다
+- src/lib/ui — 아이콘, 로고, 배경화면(전부 직접 그린 SVG)과 메뉴 표시줄, 파일 목록
+
+## 파일
+
+메모장으로 저장한 글은 C:\내 문서에 들어가고 브라우저의 localStorage(hayeon-os:files:v1)에만 남는다.
+지운 파일은 휴지통으로 가며, 휴지통을 비우면 완전히 사라진다. 드라이브와 시스템 폴더는
+src/lib/os/disk.ts 에 적힌 읽기 전용 구조다.

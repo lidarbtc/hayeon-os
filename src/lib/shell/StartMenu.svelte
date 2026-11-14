@@ -1,15 +1,16 @@
 <script lang="ts">
-  import { appList } from '../os/apps';
   import { session, type LeaveMode } from '../os/session.svelte';
-  import type { AppId } from '../os/types';
-  import { wm } from '../os/wm.svelte';
+  import { shortcuts, type Shortcut } from '../os/shell';
   import Icon from '../ui/Icon.svelte';
+
+  const programs: Shortcut[] = [shortcuts.notepad, shortcuts.computer, shortcuts.bin, shortcuts.readme];
+  const places: Shortcut[] = [shortcuts.documents, shortcuts.computer, shortcuts.system];
 
   let menu: HTMLElement;
 
-  function launch(id: AppId) {
+  function launch(shortcut: Shortcut) {
     session.startOpen = false;
-    wm.open(id);
+    shortcut.open();
   }
 
   function leave(mode: LeaveMode) {
@@ -31,10 +32,10 @@
 
 <div class="start-menu" bind:this={menu} role="menu" aria-label="시작 메뉴">
   <div class="programs">
-    {#each appList as app (app.id)}
-      <button role="menuitem" onclick={() => launch(app.id)}>
-        <Icon name={app.icon} size={32} />
-        <span>{app.label}</span>
+    {#each programs as program (program.id)}
+      <button role="menuitem" onclick={() => launch(program)}>
+        <Icon name={program.icon} size={32} />
+        <span>{program.label}</span>
       </button>
     {/each}
   </div>
@@ -46,7 +47,9 @@
       <span>S19 · 정하연</span>
     </div>
     <hr />
-    <button role="menuitem" onclick={() => launch('about')}>시스템 정보</button>
+    {#each places as place (place.id)}
+      <button role="menuitem" onclick={() => launch(place)}>{place.label}</button>
+    {/each}
   </div>
 
   <div class="power">
@@ -120,7 +123,7 @@
   .side {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
     padding: 4px 0;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
   }
@@ -145,7 +148,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 8px;
+    margin-top: 10px;
   }
 
   .who strong {

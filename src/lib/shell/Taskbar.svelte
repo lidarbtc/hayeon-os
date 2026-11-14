@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { apps } from '../os/apps';
   import { session } from '../os/session.svelte';
   import { wm } from '../os/wm.svelte';
   import Icon from '../ui/Icon.svelte';
   import Orb from '../ui/Orb.svelte';
   import Clock from './Clock.svelte';
+
+  // Message boxes belong to whoever opened them and get no button of their own.
+  const tasks = $derived(wm.windows.filter((win) => !win.dialog));
 </script>
 
 <div class="taskbar">
@@ -21,16 +23,15 @@
   </button>
 
   <div class="tasks">
-    {#each wm.windows as win (win.id)}
-      {@const app = apps[win.appId]}
+    {#each tasks as win (win.id)}
       <button
         class="task"
         class:active={wm.activeId === win.id}
-        title={app.title}
+        title={win.title}
         onclick={() => wm.toggleFromTaskbar(win.id)}
       >
-        <Icon name={app.icon} size={22} />
-        <span>{app.title}</span>
+        <Icon name={win.icon} size={22} />
+        <span>{win.title}</span>
       </button>
     {/each}
   </div>
@@ -151,7 +152,7 @@
 
   @media (max-width: 639px) {
     .task {
-      flex: 0 0 44px;
+      flex: 0 1 44px;
       justify-content: center;
     }
 

@@ -1,8 +1,9 @@
 <script lang="ts">
   import { untrack } from 'svelte';
-  import { appList, apps } from '../os/apps';
+  import { opensImmediately } from '../os/pointer';
+  import { getApp } from '../os/registry';
   import { session } from '../os/session.svelte';
-  import type { AppId } from '../os/types';
+  import { shortcuts, type Shortcut } from '../os/shell';
   import { wm } from '../os/wm.svelte';
   import Icon from '../ui/Icon.svelte';
   import Wallpaper from '../ui/Wallpaper.svelte';
@@ -10,10 +11,11 @@
   import Taskbar from './Taskbar.svelte';
   import Window from './Window.svelte';
 
+  const icons: Shortcut[] = [shortcuts.computer, shortcuts.documents, shortcuts.bin, shortcuts.notepad, shortcuts.readme];
+
   let areaWidth = $state(0);
   let areaHeight = $state(0);
-  let selected = $state<AppId | null>(null);
-  let pointerType = 'mouse';
+  let selected = $state<string | null>(null);
 
   $effect(() => {
     const w = areaWidth;
@@ -23,19 +25,17 @@
       wm.setArea(w, h);
       if (session.firstLogin) {
         session.firstLogin = false;
-        wm.open('readme');
+        shortcuts.readme.open();
       }
     });
   });
 
-  // Mouse: click selects, double-click opens. Touch and keyboard open straight away.
-  function clickIcon(event: MouseEvent, id: AppId) {
-    selected = id;
-    if (event.detail === 0 || pointerType !== 'mouse') wm.open(id);
+  function clickIcon(event: MouseEvent, icon: Shortcut) {
+    selected = icon.id;
+    if (opensImmediately(event)) icon.open();
   }
 
   function pressDesktop(event: PointerEvent) {
-    pointerType = event.pointerType;
     wm.blur();
     if (!(event.target as HTMLElement).closest('.icon')) selected = null;
   }
@@ -47,23 +47,23 @@
   <div class="workarea" bind:clientWidth={areaWidth} bind:clientHeight={areaHeight}>
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="icons" onpointerdown={pressDesktop}>
-      {#each appList as app (app.id)}
+      {#each icons as icon (icon.id)}
         <button
           class="icon"
-          class:selected={selected === app.id}
-          onclick={(event) => clickIcon(event, app.id)}
-          ondblclick={() => wm.open(app.id)}
+          class:selected={selected === icon.id}
+          onclick={(event) => clickIcon(event, icon)}
+          ondblclick={() => icon.open()}
         >
-          <Icon name={app.icon} size={48} />
-          <span>{app.label}</span>
+          <Icon name={icon.icon} size={48} />
+          <span>{icon.label}</span>
         </button>
       {/each}
     </div>
 
     {#each wm.windows as win (win.id)}
-      {@const App = apps[win.appId].component}
+      {@const App = getApp(win.appId).component}
       <Window {win}>
-        <App close={() => wm.close(win.id)} />
+        <App {win} {...win.props} />
       </Window>
     {/each}
   </div>
@@ -116,8 +116,10 @@
     word-break: keep-all;
     overflow-wrap: anywhere;
     text-shadow:
-      0 1px 2px rgba(0, 30, 40, 0.95),
-      0 0 5px rgba(0, 30, 40, 0.7);
+      0 1px 1px rgba(0, 30, 40, 1),
+      0 1px 3px rgba(0, 30, 40, 0.95),
+      0 0 6px rgba(0, 30, 40, 0.85),
+      0 0 10px rgba(0, 30, 40, 0.55);
   }
 
   .icon :global(svg) {

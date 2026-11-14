@@ -1,45 +1,62 @@
-import type { Component } from 'svelte';
-import type { AppId, IconName } from './types';
-import About from '../apps/About.svelte';
-import Readme from '../apps/Readme.svelte';
+import Dialog from '../apps/Dialog.svelte';
+import Explorer from '../apps/Explorer.svelte';
+import Notepad from '../apps/Notepad.svelte';
+import RecycleBin from '../apps/RecycleBin.svelte';
+import SystemProperties from '../apps/SystemProperties.svelte';
+import { registerApps } from './registry';
 
-export interface AppDef {
-  id: AppId;
-  title: string;
-  /** Short name used on the desktop and in the Start menu. */
-  label: string;
-  icon: IconName;
-  // Every app receives a close() callback so it never has to import the window manager.
-  component: Component<any>;
-  width: number;
-  height: number;
-  minWidth: number;
-  minHeight: number;
-}
-
-export const apps: Record<AppId, AppDef> = {
-  readme: {
-    id: 'readme',
-    title: '읽어보기.txt',
-    label: '읽어보기.txt',
-    icon: 'readme',
-    component: Readme,
-    width: 470,
-    height: 460,
-    minWidth: 280,
-    minHeight: 200
-  },
-  about: {
-    id: 'about',
-    title: 'HaYeon OS 정보',
-    label: 'HaYeon OS 정보',
-    icon: 'about',
-    component: About,
+registerApps([
+  {
+    id: 'system',
+    title: '시스템 속성',
+    icon: 'system',
+    component: SystemProperties,
     width: 420,
-    height: 430,
-    minWidth: 320,
-    minHeight: 360
+    height: 470,
+    minWidth: 420,
+    minHeight: 470,
+    resizable: false
+  },
+  {
+    id: 'notepad',
+    title: '제목 없음 - 메모장',
+    icon: 'notepad',
+    component: Notepad,
+    width: 500,
+    height: 540,
+    minWidth: 260,
+    minHeight: 180
+  },
+  {
+    id: 'explorer',
+    title: '내 컴퓨터',
+    icon: 'computer',
+    component: Explorer,
+    width: 640,
+    height: 440,
+    minWidth: 300,
+    minHeight: 240
+  },
+  {
+    id: 'bin',
+    title: '휴지통',
+    icon: 'bin',
+    component: RecycleBin,
+    width: 560,
+    height: 360,
+    minWidth: 300,
+    minHeight: 220
+  },
+  {
+    id: 'dialog',
+    title: 'HaYeon OS',
+    icon: 'info',
+    component: Dialog,
+    width: 380,
+    height: 0,
+    minWidth: 380,
+    minHeight: 0,
+    resizable: false,
+    dialog: true
   }
-};
-
-export const appList: AppDef[] = [apps.readme, apps.about];
+]);

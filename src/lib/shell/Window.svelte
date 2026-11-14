@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { apps } from '../os/apps';
   import { wm, type Win } from '../os/wm.svelte';
   import Icon from '../ui/Icon.svelte';
 
@@ -9,14 +8,14 @@
   type Dir = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
   const dirs: Dir[] = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
 
-  const app = $derived(apps[win.appId]);
   const active = $derived(wm.activeId === win.id);
-  const maximized = $derived(win.maximized || wm.compact);
-  const style = $derived(
-    maximized
-      ? 'z-index:' + win.z
-      : 'left:' + win.x + 'px;top:' + win.y + 'px;width:' + win.w + 'px;height:' + win.h + 'px;z-index:' + win.z
-  );
+  const maximized = $derived(win.resizable && (win.maximized || wm.compact));
+  const style = $derived.by(() => {
+    // Message boxes take their height from their content and always sit above normal windows.
+    if (win.dialog) return 'left:' + win.x + 'px;top:' + win.y + 'px;width:' + win.w + 'px;z-index:' + (win.z + 100000);
+    if (maximized) return 'z-index:' + win.z;
+    return 'left:' + win.x + 'px;top:' + win.y + 'px;width:' + win.w + 'px;height:' + win.h + 'px;z-index:' + win.z;
+  });
 
   // One pointer gesture at a time: dir === null moves the window, anything else resizes it.
   let gesture: { px: number; py: number; x: number; y: number; w: number; h: number; dir: Dir | null } | null = null;
@@ -38,15 +37,15 @@
       return;
     }
     let { x, y, w, h } = gesture;
-    if (dir.includes('e')) w = Math.max(app.minWidth, gesture.w + dx);
-    if (dir.includes('s')) h = Math.max(app.minHeight, gesture.h + dy);
+    if (dir.includes('e')) w = Math.max(win.minW, gesture.w + dx);
+    if (dir.includes('s')) h = Math.max(win.minH, gesture.h + dy);
     if (dir.includes('w')) {
-      w = Math.max(app.minWidth, gesture.w - dx);
+      w = Math.max(win.minW, gesture.w - dx);
       x = gesture.x + gesture.w - w;
     }
     if (dir.includes('n')) {
       // The top edge stops at the top of the work area so the title bar stays reachable.
-      const top = Math.max(0, Math.min(gesture.y + dy, gesture.y + gesture.h - app.minHeight));
+      const top = Math.max(0, Math.min(gesture.y + dy, gesture.y + gesture.h - win.minH));
       h = gesture.y + gesture.h - top;
       y = top;
     }
@@ -70,7 +69,7 @@
   class:maximized
   class:minimized={win.minimized}
   {style}
-  aria-label={app.title}
+  aria-label={win.title}
   onpointerdowncapture={() => wm.focus(win.id)}
 >
   <header
@@ -81,13 +80,15 @@
     onpointercancel={end}
     ondblclick={toggleMaximize}
   >
-    <Icon name={app.icon} size={16} />
-    <span class="title">{app.title}</span>
+    <Icon name={win.icon} size={16} />
+    <span class="title">{win.title}</span>
     <div class="controls">
-      <button aria-label="최소화" title="최소화" onclick={() => wm.minimize(win.id)}>
-        <svg viewBox="0 0 12 10" width="12" height="10" aria-hidden="true"><rect x="2" y="6.5" width="8" height="2.2" /></svg>
-      </button>
-      {#if !wm.compact}
+      {#if !win.dialog}
+        <button aria-label="최소화" title="최소화" onclick={() => wm.minimize(win.id)}>
+          <svg viewBox="0 0 12 10" width="12" height="10" aria-hidden="true"><rect x="2" y="6.5" width="8" height="2.2" /></svg>
+        </button>
+      {/if}
+      {#if win.resizable && !wm.compact}
         <button
           aria-label={win.maximized ? '이전 크기로' : '최대화'}
           title={win.maximized ? '이전 크기로' : '최대화'}
@@ -102,7 +103,7 @@
           </svg>
         </button>
       {/if}
-      <button class="close" aria-label="닫기" title="닫기" onclick={() => wm.close(win.id)}>
+      <button class="close" aria-label="닫기" title="닫기" onclick={() => wm.requestClose(win.id)}>
         <svg viewBox="0 0 12 10" width="12" height="10" aria-hidden="true">
           <path d="M2.4 1.4l7.2 7.2M9.6 1.4L2.4 8.6" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" />
         </svg>
@@ -110,7 +111,7 @@
     </div>
   </header>
   <div class="body">{@render children()}</div>
-  {#if !maximized}
+  {#if win.resizable && !maximized}
     {#each dirs as dir (dir)}
       <div
         class="grip {dir}"

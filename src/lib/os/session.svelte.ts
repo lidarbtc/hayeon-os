@@ -20,6 +20,8 @@ class Session {
 
   leave(mode: LeaveMode) {
     this.startOpen = false;
+    // Windows with unsaved work ask first; leaving waits until they are closed.
+    if (!wm.requestCloseAll()) return;
     this.leaveMode = mode;
     this.phase = 'leaving';
   }
