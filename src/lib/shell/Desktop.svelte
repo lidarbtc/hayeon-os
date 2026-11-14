@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { untrack } from 'svelte';
+  import { onMount, untrack } from 'svelte';
+  import { keepPhotos } from '../os/offline.svelte';
   import { opensImmediately } from '../os/pointer';
   import { getApp } from '../os/registry';
   import { session } from '../os/session.svelte';
@@ -30,6 +31,12 @@
   let areaWidth = $state(0);
   let areaHeight = $state(0);
   let selected = $state<string | null>(null);
+
+  // Once the desktop has settled, save the photos for the next visit.
+  onMount(() => {
+    const timer = setTimeout(keepPhotos, 4000);
+    return () => clearTimeout(timer);
+  });
 
   $effect(() => {
     const w = areaWidth;

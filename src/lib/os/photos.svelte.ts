@@ -24,12 +24,17 @@ export const photos: Photo[] = list;
 
 const base = import.meta.env.BASE_URL + 'photos/';
 
+// The hash changes with the file, so a saved copy is never mistaken for a replaced picture.
+function rev(photo: Photo) {
+  return '.webp?v=' + (__PHOTO_REVS__[photo.id] ?? '0');
+}
+
 export function photoUrl(photo: Photo) {
-  return base + photo.id + '.webp';
+  return base + photo.id + rev(photo);
 }
 
 export function thumbUrl(photo: Photo) {
-  return base + 'thumb/' + photo.id + '.webp';
+  return base + 'thumb/' + photo.id + rev(photo);
 }
 
 export function photoById(id: string | null) {

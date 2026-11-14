@@ -62,6 +62,18 @@ to `src/lib/os/guestbook-blocked.json` and redeploy. Visitors can remove their o
 subfolder. hayeon.eth is rebuilt and published automatically on every push to `main`
 (`npm run build`, output `dist`, Node 20+).
 
+The site is reached through the eth.limo and eth.link gateways, where every request costs
+about a second and a file is much slower the first time a gateway is asked for it. Three
+things keep that from showing:
+
+- The build is a single `index.html` with the script and styles folded in (see
+  `vite.config.ts`), so the desktop needs one request.
+- A service worker (`public/sw.js`) keeps a copy of the page and the photos on the visitor's
+  device. Return visits open from that copy and fetch the newest build in the background; a
+  balloon in the taskbar offers a restart when one has arrived.
+- `.github/workflows/warm.yml` requests every file through both gateways after each push and
+  every six hours.
+
 ## Layout
 
 | Path | Contents |

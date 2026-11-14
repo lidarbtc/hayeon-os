@@ -4,6 +4,7 @@
   import Icon from '../ui/Icon.svelte';
   import Orb from '../ui/Orb.svelte';
   import Clock from './Clock.svelte';
+  import UpdateNotice from './UpdateNotice.svelte';
 
   // Message boxes belong to whoever opened them and get no button of their own.
   const tasks = $derived(wm.windows.filter((win) => !win.dialog));
@@ -37,6 +38,7 @@
     {/each}
   </div>
 
+  <UpdateNotice />
   <Clock />
   <button class="peek" aria-label="바탕 화면 보기" title="바탕 화면 보기" onclick={() => wm.toggleDesktop()}></button>
 </div>

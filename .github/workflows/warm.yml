@@ -1,0 +1,67 @@
+name: Warm the gateways
+
+# hayeon.eth is served through eth.limo and eth.link. Those gateways answer in
+# about a second once they hold a file, but need many seconds the first time one
+# of their nodes is asked for it. This job asks for every file a few times after
+# each release, so that visitors are not the ones who wait.
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: warm
+  cancel-in-progress: true
+
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Wait for the new release
+        if: github.event_name == 'push'
+        run: |
+          # The gateway reports the release it serves in the x-ipfs-roots header.
+          release() {
+            curl -sS -I --max-time 30 https://hayeon.eth.limo/ | tr -d '\r' | awk 'tolower($1) == "x-ipfs-roots:" { print $2 }'
+          }
+          before=$(release || true)
+          for attempt in $(seq 1 32); do
+            sleep 15
+            now=$(release || true)
+            if [ -n "$now" ] && [ "$now" != "$before" ]; then
+              echo "New release: $now"
+              exit 0
+            fi
+          done
+          echo "No new release showed up in 8 minutes. Warming what is there."
+
+      - name: Ask both gateways for every file
+        run: |
+          # The page itself, then everything in public/ (photos, sw.js, favicon).
+          { echo index.html; find public -type f -printf '%P\n'; } > files.txt
+
+          warm() {
+            for host in hayeon.eth.limo hayeon.eth.link; do
+              for round in 1 2 3 4 5 6; do
+                curl -sS -o /dev/null --compressed --max-time 90 -w "%{http_code} %{time_total}s $host/\n" "https://$host/" || true
+                xargs -P 6 -I{} curl -sS -o /dev/null --compressed --max-time 90 \
+                  -w "%{http_code} %{time_total}s $host/{}\n" "https://$host/{}" < files.txt || true
+              done
+            done
+          }
+
+          warm
+          if [ "$GITHUB_EVENT_NAME" = push ]; then
+            # Gateway nodes switch to a new release up to five minutes apart.
+            sleep 300
+            warm
+          fi
