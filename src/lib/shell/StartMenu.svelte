@@ -8,6 +8,7 @@
   const programs: Shortcut[] = [
     shortcuts.photos,
     shortcuts.profile,
+    shortcuts.guestbook,
     shortcuts.notepad,
     shortcuts.hedgehog,
     shortcuts.player,

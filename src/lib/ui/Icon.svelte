@@ -208,6 +208,12 @@
       <circle cx="11" cy="16.8" r="2.6" fill="#52d9bb" stroke="#0b6a63" stroke-width=".8" />
       <path d="M6.6 23.8a4.4 4.4 0 0 1 8.8 0z" fill="#52d9bb" stroke="#0b6a63" stroke-width=".8" stroke-linejoin="round" />
       <path d="M18 15.5h7M18 19h7M18 22.5h4.5" stroke="#7fb8c9" stroke-width="1.3" stroke-linecap="round" />
+    {:else if name === 'guestbook'}
+      <path d="M5.5 5.5h21V21l-6 6h-15z" fill="#fbf3ae" stroke="#b7a640" stroke-linejoin="round" />
+      <path d="M26.5 21h-6v6z" fill="#e3d67a" stroke="#b7a640" stroke-linejoin="round" />
+      <path d="M9.5 11h13M9.5 14.5h13M9.5 18h8" stroke="#a89a45" stroke-width="1.2" stroke-linecap="round" />
+      <circle cx="16" cy="5.5" r="2.8" fill="url(#{uid}-aqua)" stroke="#0b6a63" />
+      <circle cx="15.2" cy="4.7" r=".9" fill="#fff" opacity=".8" />
     {:else if name === 'error'}
       <circle cx="16" cy="16" r="13" fill="url(#{uid}-red)" stroke="#8a1a0c" />
       <ellipse cx="16" cy="10" rx="9" ry="5.5" fill="#fff" opacity=".25" />

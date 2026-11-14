@@ -18,6 +18,7 @@
     shortcuts.documents,
     shortcuts.photos,
     shortcuts.profile,
+    shortcuts.guestbook,
     shortcuts.bin,
     shortcuts.notepad,
     shortcuts.hedgehog,

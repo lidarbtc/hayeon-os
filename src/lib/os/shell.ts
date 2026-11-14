@@ -53,6 +53,14 @@ export const shortcuts = {
       wm.open('profile');
     }
   },
+  guestbook: {
+    id: 'guestbook',
+    label: '방명록',
+    icon: 'guestbook',
+    open: () => {
+      wm.open('guestbook');
+    }
+  },
   bin: {
     id: 'bin',
     label: '휴지통',

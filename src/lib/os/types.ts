@@ -17,6 +17,7 @@ export type IconName =
   | 'control'
   | 'pictures'
   | 'profile'
+  | 'guestbook'
   | 'github'
   | 'error'
   | 'question'
@@ -39,6 +40,7 @@ export type AppId =
   | 'control'
   | 'photos'
   | 'profile'
+  | 'guestbook'
   | 'dialog';
 
 export interface AppDef {

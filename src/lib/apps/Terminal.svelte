@@ -149,6 +149,7 @@
     [['notepad', '메모장'], shortcuts.notepad],
     [['photos', '사진', '내 사진'], shortcuts.photos],
     [['profile', '프로필'], shortcuts.profile],
+    [['guestbook', '방명록'], shortcuts.guestbook],
     [['hedgehog', '고슴도치', '고슴도치 찾기'], shortcuts.hedgehog],
     [['player', '미디어', '미디어 플레이어'], shortcuts.player],
     [['control', '제어판'], shortcuts.control],

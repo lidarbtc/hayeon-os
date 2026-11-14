@@ -14,7 +14,8 @@ Unofficial fan work. Not affiliated with MODHAUS or tripleS.
 - Windows you can drag, resize, minimize and maximize, with a taskbar and a start menu
 - **My Pictures**: a photo viewer with a slideshow; any photo can become the wallpaper
 - **Profile**: HaYeon's profile and timeline
-- Desktop gadgets: a photo frame and a birthday countdown
+- **Guestbook**: sticky notes that every visitor sees, live
+- Desktop gadgets: a photo frame, a birthday countdown and the latest note
 - Notepad, My Computer and a Recycle Bin, backed by `localStorage`
 - Hedgehog Finder, a minesweeper with hedgehogs
 - Media Player, with three tunes synthesised live by Web Audio
@@ -43,6 +44,17 @@ pnpm build    # static files in dist/
 
 Two optional fields: `focus` is a CSS `object-position` that keeps the subject in view when a
 photo is cropped, and `avatar: true` marks the photo used on the welcome screen.
+
+## Guestbook
+
+Notes are signed in the browser with a throwaway key and stored on public
+[Nostr](https://github.com/nostr-protocol/nips) relays (kind 30078, tagged `hayeon-os-guestbook`), so
+there is still no backend and leaving a note costs nothing. Each note carries a small proof of
+work to slow down spam, and the same relays carry a heartbeat that counts who is online. These
+relay connections are the only external requests the page makes.
+
+To take a note down, add its event id (the tooltip on a note's time) or its author's public key
+to `src/lib/os/guestbook-blocked.json` and redeploy. Visitors can remove their own notes.
 
 ## Deployment
 

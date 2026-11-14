@@ -1,5 +1,6 @@
 <script lang="ts">
   import { fade } from 'svelte/transition';
+  import { guestbook } from '../os/guestbook.svelte';
   import { birthdayLabel, daysSinceDebut, daysSinceReveal, daysToBirthday } from '../os/hayeon';
   import { photos, thumbUrl, viewer } from '../os/photos.svelte';
   import { wm } from '../os/wm.svelte';
@@ -8,8 +9,23 @@
 
   let index = $state(0);
   let now = $state(new Date());
+  let turn = $state(0);
 
   const shown = $derived(photos[index % Math.max(1, photos.length)]);
+  // The newest few notes take turns; a note that has just arrived is shown at once.
+  const recent = $derived(guestbook.notes.slice(0, 5));
+  const note = $derived(recent[turn % Math.max(1, recent.length)]);
+
+  $effect(() => {
+    guestbook.start();
+    const timer = setInterval(() => turn++, 7000);
+    return () => clearInterval(timer);
+  });
+
+  $effect(() => {
+    void guestbook.notes[0]?.key;
+    turn = 0;
+  });
 
   $effect(() => {
     if (photos.length < 2) return;
@@ -50,6 +66,20 @@
       <dd>{daysSinceReveal(now).toLocaleString('ko-KR')}일째</dd>
     </dl>
   </div>
+
+  <button class="book" title="방명록 열기" onclick={() => wm.open('guestbook')}>
+    <span class="head"><b>방명록</b><i class:on={guestbook.relays > 0}></i>{guestbook.online}명 접속 중</span>
+    {#if note}
+      {#key note.key}
+        <span class="slip {note.color}" in:fade={{ duration: 300 }}>
+          <span class="words">{note.text}</span>
+          <small>{note.name}</small>
+        </span>
+      {/key}
+    {:else}
+      <span class="quiet">{guestbook.relays ? '첫 쪽지를 붙여 보세요' : '연결하는 중…'}</span>
+    {/if}
+  </button>
 </aside>
 
 <style>
@@ -66,7 +96,8 @@
   }
 
   .frame,
-  .dday {
+  .dday,
+  .book {
     border: 1px solid rgba(3, 34, 42, 0.7);
     border-radius: 8px;
     background:
@@ -89,7 +120,9 @@
   }
 
   .frame:hover,
-  .frame:focus-visible {
+  .frame:focus-visible,
+  .book:hover,
+  .book:focus-visible {
     outline: none;
     box-shadow:
       inset 0 0 0 1px rgba(255, 255, 255, 0.7),
@@ -173,5 +206,93 @@
     margin: 0;
     text-align: right;
     font-variant-numeric: tabular-nums;
+  }
+
+  .book {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 8px 8px 9px;
+    color: inherit;
+    text-align: left;
+    text-shadow: inherit;
+  }
+
+  .head {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+  }
+
+  .head b {
+    margin-right: auto;
+    font-weight: 600;
+  }
+
+  .head i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #8ea5aa;
+  }
+
+  .head i.on {
+    background: #7dff9b;
+    box-shadow: 0 0 5px #7dff9b;
+  }
+
+  .slip {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 7px 8px 6px;
+    border-radius: 1px 1px 9px 1px;
+    color: var(--hy-ink);
+    background: var(--paper);
+    box-shadow: 0 2px 5px rgba(0, 30, 40, 0.35);
+    text-shadow: none;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .words {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
+
+  .slip small {
+    color: #4a666c;
+    text-align: right;
+  }
+
+  .mint {
+    --paper: #c9f7ea;
+  }
+
+  .lemon {
+    --paper: #fbf3ae;
+  }
+
+  .pink {
+    --paper: #ffd9e2;
+  }
+
+  .sky {
+    --paper: #cfe9fb;
+  }
+
+  .lilac {
+    --paper: #e4dcfb;
+  }
+
+  .quiet {
+    font-size: 12px;
+    opacity: 0.85;
   }
 </style>

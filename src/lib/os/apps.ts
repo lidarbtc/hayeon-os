@@ -1,6 +1,7 @@
 import ControlPanel from '../apps/ControlPanel.svelte';
 import Dialog from '../apps/Dialog.svelte';
 import Explorer from '../apps/Explorer.svelte';
+import Guestbook from '../apps/Guestbook.svelte';
 import HedgehogFinder from '../apps/HedgehogFinder.svelte';
 import MediaPlayer from '../apps/MediaPlayer.svelte';
 import Notepad from '../apps/Notepad.svelte';
@@ -116,6 +117,16 @@ registerApps([
     height: 560,
     minWidth: 300,
     minHeight: 260
+  },
+  {
+    id: 'guestbook',
+    title: '방명록',
+    icon: 'guestbook',
+    component: Guestbook,
+    width: 560,
+    height: 560,
+    minWidth: 300,
+    minHeight: 320
   },
   {
     id: 'dialog',
