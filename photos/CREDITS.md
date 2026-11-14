@@ -1,11 +1,13 @@
 # Photo credits
 
 The photos in `public/photos` are not covered by this repository's Apache-2.0 licence.
-All of them were resized; changes beyond that are noted.
+They are official photos of Jeong HaYeon, © MODHAUS, taken from posts on the official tripleS
+account [@triplescosmos](https://x.com/triplescosmos) and resized. They are shown here as fan
+appreciation and will be removed on request.
 
-| File | Source | Author | Licence | Changes |
-| --- | --- | --- | --- | --- |
-| `showcase-2026-06.webp` | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:2026-06-01_-_tripleS_at_the_'Baby_Flower'_Showcase_for_ASSEMBLE26_'LOVE_%26_POP'_Part_one_'LOVE'.jpg) | K-POPit 티비텐 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | |
-| `hayeon-2026-06.webp` | Same as above | K-POPit 티비텐 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Cropped |
-| `showcase-2025-11.webp` | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:251124_-_tripleS_at_the_Beyond_Beauty_album_showcase.png) | K-POPIT 케이팝잇 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | |
-| `showcase-2025-05.webp` | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:TripleS_250512.jpg) | K-POPIT 케이팝잇 | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | |
+| Files | Posted | Source |
+| --- | --- | --- |
+| `hayeon-hanoi-1..3.webp` | 2025-07-03 | https://x.com/triplescosmos/status/1940682823842910246 |
+| `hayeon-rolex-1..3.webp` | 2024-12-03 | https://x.com/triplescosmos/status/1863931002604937535 |
+| `hayeon-japan-1..2.webp` | 2024-07-30 | https://x.com/triplescosmos/status/1818218194831810696 |
+| `hayeon-s19-reveal.webp` | 2023-12-23 | https://x.com/triplescosmos/status/1738529887881929036 |

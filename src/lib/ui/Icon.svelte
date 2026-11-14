@@ -73,6 +73,21 @@
       <path d="M3.5 7.5 8 3l4.5 4.5M8 3v10" />
     {/if}
   </svg>
+{:else if name === 'triples'}
+  <!-- The triples.love mark. -->
+  <svg viewBox="0 0 64 64" width={size} height={size} aria-hidden="true">
+    <rect width="64" height="64" rx="16" fill="#18171f" />
+    <g fill="none" stroke="#fff" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16.5 20.5c3.7-5.9 10.7-8.6 17.3-6.7 6.9 1.9 11.7 7.5 12.8 14.1" />
+      <path d="M48.3 42.1c-3.5 6.1-10.7 9-17.6 7.4-6.9-1.6-12.2-6.9-13.6-13.6" />
+      <path d="M17.1 35.7c-5.1-4.8-6.1-12.5-2.4-18.4 3.7-5.9 10.7-8.8 17.3-6.9" />
+    </g>
+    <g fill="#fff">
+      <circle cx="47.2" cy="28.5" r="5.3" />
+      <circle cx="16.8" cy="35.2" r="5.3" />
+      <circle cx="32.5" cy="12.5" r="5.3" />
+    </g>
+  </svg>
 {:else if name === 'github'}
   <svg viewBox="0 0 16 16" width={size} height={size} fill="currentColor" aria-hidden="true">
     <path

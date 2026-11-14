@@ -239,7 +239,7 @@
               owner: win.id,
               title: '메모장 정보',
               kind: 'info',
-              message: '메모장\nHaYeon OS S19 (Build 20070801)\n\n저장한 글은 이 브라우저 안에만 남습니다.'
+              message: '메모장\nHaYeon OS S19 (Build 20070801)\n\n쓴 글은 지금 쓰는 기기에만 저장됩니다.'
             });
           }
         }

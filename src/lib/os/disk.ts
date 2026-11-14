@@ -41,8 +41,8 @@ export interface StaticFolder {
 const readme = [
   'HaYeon OS S19에 오신 것을 환영합니다.',
   '',
-  '이 컴퓨터는 hayeon.eth에 설치되어 있습니다.',
-  '서버 없이 IPFS 위에서 혼자 부팅됩니다.',
+  '정하연을 좋아하는 팬이 만든 작은 컴퓨터입니다.',
+  '아이콘을 두 번 누르면 열립니다. 천천히 둘러보세요.',
   '',
   '[지금 할 수 있는 것]',
   '- 내 사진: 하연 사진을 넘겨 보고 바탕 화면으로 걸기',
@@ -58,7 +58,7 @@ const readme = [
   '- 제어판: 테마와 배경 화면 바꾸기, 중력 켜기',
   '- 창을 끌어 옮기고, 가장자리를 잡아 크기 바꾸기',
   '',
-  '저장한 글은 이 브라우저 안에만 남습니다.',
+  '메모장에 쓴 글은 지금 쓰는 기기에만 저장됩니다.',
   '',
   'Build 20070801'
 ].join('\n');
@@ -69,7 +69,7 @@ const bootIni = [
   'default=hayeon.eth',
   '',
   '[operating systems]',
-  'hayeon.eth="HaYeon OS S19" /build:20070801 /theme:52D9BB /server:none'
+  'hayeon.eth="HaYeon OS S19" /build:20070801 /theme:52D9BB /mascot:hedgehog'
 ].join('\n');
 
 const tree: Record<string, StaticFolder> = {

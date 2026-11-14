@@ -3,8 +3,8 @@
 A small fan-made operating system that lives at [hayeon.eth](https://hayeon.eth.limo).
 
 It is a single static page that boots into a Windows XP / 7 style desktop, painted in
-Medium Turquoise (`#52D9BB`), the colour of tripleS S19 Jeong HaYeon. There is no server:
-one build, pinned to IPFS, and everything you save stays in your browser.
+Medium Turquoise (`#52D9BB`), the colour of tripleS S19 Jeong HaYeon. It is a static site with
+no backend, and everything you save stays in your browser.
 
 Unofficial fan work. Not affiliated with MODHAUS or tripleS.
 
@@ -58,12 +58,9 @@ to `src/lib/os/guestbook-blocked.json` and redeploy. Visitors can remove their o
 
 ## Deployment
 
-`dist/` is plain static files with relative paths, so it works from any host and under
-an IPFS gateway path such as `/ipfs/<cid>/`.
-
-hayeon.eth is deployed by 4EVERLAND on every push to `main` (Vite preset,
-`npm run build`, output `dist`, Node 20+). The ENS content hash points at the
-project's IPNS name, so the name follows each new build.
+`dist/` is plain static files with relative paths, so it can be served from any host or
+subfolder. hayeon.eth is rebuilt and published automatically on every push to `main`
+(`npm run build`, output `dist`, Node 20+).
 
 ## Layout
 
@@ -79,4 +76,4 @@ project's IPNS name, so the name follows each new build.
 ## License
 
 Code is under [Apache-2.0](LICENSE). The photos in `public/photos` are not part of that
-licence; each belongs to its author under the terms listed in [photos/CREDITS.md](photos/CREDITS.md).
+licence: they are official photos © MODHAUS, credited in [photos/CREDITS.md](photos/CREDITS.md).

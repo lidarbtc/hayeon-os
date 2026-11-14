@@ -19,7 +19,7 @@
 
   let lines = $state<Line[]>([
     { text: VERSION },
-    { text: 'hayeon.eth에 설치됨. 서버 없음.' },
+    { text: '정하연을 좋아하는 팬이 만든 컴퓨터.' },
     { text: '' },
     { text: 'help 를 입력하면 명령어 목록이 나옵니다.' },
     { text: '' }

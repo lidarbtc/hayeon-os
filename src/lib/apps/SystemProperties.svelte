@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { REPO_LABEL, REPO_URL } from '../os/about';
+  import { REPO_URL, TRIPLES_URL } from '../os/about';
   import { wm, type Win } from '../os/wm.svelte';
   import Icon from '../ui/Icon.svelte';
   import Orb from '../ui/Orb.svelte';
@@ -51,8 +51,15 @@
         <dd>hayeon.eth</dd>
         <dt>테마 색</dt>
         <dd><i class="swatch"></i>Medium Turquoise #52D9BB</dd>
-        <dt>소스 코드</dt>
-        <dd><a href={REPO_URL} target="_blank" rel="noopener noreferrer">{REPO_LABEL}</a></dd>
+        <dt>만든 사람</dt>
+        <dd class="links">
+          <a href={TRIPLES_URL} target="_blank" rel="noopener" title="triples.love" aria-label="triples.love">
+            <Icon name="triples" size={22} />
+          </a>
+          <a href={REPO_URL} target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub">
+            <Icon name="github" size={20} />
+          </a>
+        </dd>
       </dl>
     {:else if tab === '컴퓨터 이름'}
       <p class="lead">
@@ -69,12 +76,6 @@
       </dl>
       <p class="note">tripleS S19 정하연을 좋아하는 팬이 만든 비공식 작품입니다.</p>
     {:else}
-      <dl>
-        <dt>저장 장치</dt>
-        <dd>IPFS</dd>
-        <dt>서버</dt>
-        <dd>없음</dd>
-      </dl>
       <h3>지금 빌려 쓰는 컴퓨터</h3>
       <dl>
         <dt>화면</dt>
@@ -195,8 +196,22 @@
     margin: 0;
   }
 
-  dd a {
-    color: #0b6f7d;
+  .links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .links a {
+    display: block;
+    border-radius: 5px;
+    color: #18171f;
+  }
+
+  .links a:hover,
+  .links a:focus-visible {
+    outline: 2px solid var(--hy-turquoise);
+    outline-offset: 2px;
   }
 
   .swatch {

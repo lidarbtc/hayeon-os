@@ -19,6 +19,7 @@ export type IconName =
   | 'profile'
   | 'guestbook'
   | 'github'
+  | 'triples'
   | 'error'
   | 'question'
   | 'info'

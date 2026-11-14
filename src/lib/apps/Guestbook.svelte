@@ -28,7 +28,7 @@
   const status = $derived.by(() => {
     if (message) return message;
     if (guestbook.busy) return '쪽지를 접는 중…';
-    if (guestbook.relays) return '쪽지 ' + guestbook.notes.length + '장 · 릴레이 ' + guestbook.relays + '곳';
+    if (guestbook.relays) return '쪽지 ' + guestbook.notes.length + '장';
     return guestbook.settled ? '연결하지 못했습니다. 계속 시도하는 중…' : '연결하는 중…';
   });
 

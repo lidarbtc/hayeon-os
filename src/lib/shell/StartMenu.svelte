@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { REPO_URL } from '../os/about';
+  import { REPO_URL, TRIPLES_URL } from '../os/about';
   import { session, type LeaveMode } from '../os/session.svelte';
   import { shortcuts, type Shortcut } from '../os/shell';
   import Avatar from '../ui/Avatar.svelte';
@@ -65,9 +65,14 @@
   </div>
 
   <div class="power">
-    <a class="source" href={REPO_URL} target="_blank" rel="noopener noreferrer" role="menuitem" title="소스 코드">
-      <Icon name="github" size={14} />GitHub
-    </a>
+    <div class="links">
+      <a href={TRIPLES_URL} target="_blank" rel="noopener" role="menuitem" title="triples.love" aria-label="triples.love">
+        <Icon name="triples" size={20} />
+      </a>
+      <a href={REPO_URL} target="_blank" rel="noopener noreferrer" role="menuitem" title="GitHub" aria-label="GitHub">
+        <Icon name="github" size={18} />
+      </a>
+    </div>
     <button role="menuitem" onclick={() => leave('logoff')}><Icon name="logoff" size={15} />로그오프</button>
     <button role="menuitem" onclick={() => leave('restart')}><Icon name="restart" size={15} />다시 시작</button>
     <button role="menuitem" class="shutdown" onclick={() => leave('shutdown')}>
@@ -233,26 +238,30 @@
     background: linear-gradient(180deg, #ffc0b3, #f0624a 46%, #dc3418 50%, #ff9a70);
   }
 
-  /* A quiet link to the source, pushed to the far side of the power buttons. */
-  .source {
+  /* Two quiet links, pushed to the far side of the power buttons. */
+  .links {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 2px;
     margin-right: auto;
-    padding: 4px 8px 4px 5px;
-    border: 1px solid transparent;
-    border-radius: 3px;
-    color: inherit;
-    font-size: 12px;
-    text-decoration: none;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
-    opacity: 0.8;
   }
 
-  .source:hover,
-  .source:focus-visible {
+  .links a {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: inherit;
+    opacity: 0.85;
+  }
+
+  .links a:hover,
+  .links a:focus-visible {
     outline: none;
     border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.16);
     opacity: 1;
   }
 
