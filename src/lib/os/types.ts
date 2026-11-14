@@ -12,6 +12,9 @@ export type IconName =
   | 'cd'
   | 'bin'
   | 'bin-full'
+  | 'player'
+  | 'terminal'
+  | 'control'
   | 'error'
   | 'question'
   | 'info'
@@ -22,7 +25,16 @@ export type IconName =
   | 'back'
   | 'up';
 
-export type AppId = 'system' | 'notepad' | 'explorer' | 'bin' | 'dialog';
+export type AppId =
+  | 'system'
+  | 'notepad'
+  | 'explorer'
+  | 'bin'
+  | 'hedgehog'
+  | 'player'
+  | 'terminal'
+  | 'control'
+  | 'dialog';
 
 export interface AppDef {
   id: AppId;

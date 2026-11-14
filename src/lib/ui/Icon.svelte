@@ -175,6 +175,21 @@
         <ellipse cx="16" cy="9.5" rx="8.6" ry="2.4" fill="#f4fffd" stroke="#3c8f8a" />
       {/if}
       <path d="M12.3 14.5l.8 11M16 14.5v11M19.7 14.5l-.8 11" stroke="#3c8f8a" stroke-linecap="round" opacity=".5" />
+    {:else if name === 'player'}
+      <circle cx="16" cy="16" r="13" fill="url(#{uid}-aqua)" stroke="#0b6a63" />
+      <ellipse cx="16" cy="10" rx="9" ry="5.5" fill="#fff" opacity=".3" />
+      <path d="M13 10.2v11.6l9.2-5.8z" fill="#fff" stroke="#0b6a63" stroke-width=".8" stroke-linejoin="round" />
+    {:else if name === 'terminal'}
+      <rect x="2.5" y="5.5" width="27" height="21" rx="2.5" fill="url(#{uid}-case)" stroke="#5c6f78" />
+      <rect x="5" y="9.5" width="22" height="14.5" rx="1" fill="#04222a" stroke="#2c6f74" stroke-width=".8" />
+      <path d="M8 13.5l3.5 3-3.5 3" fill="none" stroke="#52d9bb" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M13.5 20h5.5" stroke="#52d9bb" stroke-width="1.6" stroke-linecap="round" />
+    {:else if name === 'control'}
+      <rect x="3.5" y="4.5" width="25" height="23" rx="3" fill="url(#{uid}-case)" stroke="#5c6f78" />
+      <path d="M8 11h16M8 16h16M8 21h16" stroke="#6d8791" stroke-width="1.6" stroke-linecap="round" />
+      <circle cx="12" cy="11" r="2.6" fill="url(#{uid}-aqua)" stroke="#0b6a63" />
+      <circle cx="20.5" cy="16" r="2.6" fill="url(#{uid}-aqua)" stroke="#0b6a63" />
+      <circle cx="14.5" cy="21" r="2.6" fill="url(#{uid}-aqua)" stroke="#0b6a63" />
     {:else if name === 'error'}
       <circle cx="16" cy="16" r="13" fill="url(#{uid}-red)" stroke="#8a1a0c" />
       <ellipse cx="16" cy="10" rx="9" ry="5.5" fill="#fff" opacity=".25" />

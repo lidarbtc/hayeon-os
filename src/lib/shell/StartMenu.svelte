@@ -3,8 +3,15 @@
   import { shortcuts, type Shortcut } from '../os/shell';
   import Icon from '../ui/Icon.svelte';
 
-  const programs: Shortcut[] = [shortcuts.notepad, shortcuts.computer, shortcuts.bin, shortcuts.readme];
-  const places: Shortcut[] = [shortcuts.documents, shortcuts.computer, shortcuts.system];
+  const programs: Shortcut[] = [
+    shortcuts.notepad,
+    shortcuts.hedgehog,
+    shortcuts.player,
+    shortcuts.terminal,
+    shortcuts.bin,
+    shortcuts.readme
+  ];
+  const places: Shortcut[] = [shortcuts.documents, shortcuts.computer, shortcuts.control, shortcuts.system];
 
   let menu: HTMLElement;
 
@@ -216,6 +223,12 @@
   .power .shutdown:focus-visible {
     border-color: rgba(90, 20, 10, 0.8);
     background: linear-gradient(180deg, #ffc0b3, #f0624a 46%, #dc3418 50%, #ff9a70);
+  }
+
+  :global([data-theme='luna']) .start-menu {
+    background: linear-gradient(180deg, #1fb0b8, #0b7f93);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 
   @keyframes pop {

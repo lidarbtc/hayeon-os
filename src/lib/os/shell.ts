@@ -69,5 +69,37 @@ export const shortcuts = {
     open: () => {
       wm.open('system');
     }
+  },
+  hedgehog: {
+    id: 'hedgehog',
+    label: '고슴도치 찾기',
+    icon: 'hedgehog',
+    open: () => {
+      wm.open('hedgehog');
+    }
+  },
+  player: {
+    id: 'player',
+    label: '미디어 플레이어',
+    icon: 'player',
+    open: () => {
+      wm.open('player');
+    }
+  },
+  terminal: {
+    id: 'terminal',
+    label: '터미널',
+    icon: 'terminal',
+    open: () => {
+      wm.open('terminal');
+    }
+  },
+  control: {
+    id: 'control',
+    label: '제어판',
+    icon: 'control',
+    open: () => {
+      wm.open('control');
+    }
   }
 } satisfies Record<string, Shortcut>;

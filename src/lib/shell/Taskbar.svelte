@@ -20,6 +20,7 @@
     onclick={() => (session.startOpen = !session.startOpen)}
   >
     <Orb size={36} />
+    <span class="start-label">시작</span>
   </button>
 
   <div class="tasks">
@@ -148,6 +149,66 @@
   .peek:focus-visible {
     outline: none;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.25));
+  }
+
+  .start-label {
+    display: none;
+  }
+
+  /* Luna: a solid bar with the classic green start button. */
+  :global([data-theme='luna']) .taskbar {
+    padding-left: 0;
+    border-top-color: #0a5b6d;
+    background: linear-gradient(180deg, #4fd8bf 0%, #14a3ac 8%, #0e8b9c 45%, #0c7a8d 90%, #0a6679 100%);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  }
+
+  :global([data-theme='luna']) .start {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: auto;
+    height: auto;
+    padding: 0 20px 0 8px;
+    border-radius: 0 16px 16px 0;
+    background: linear-gradient(180deg, #a5ec7a 0%, #56c04a 10%, #3aa53e 55%, #2c8a36 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      2px 0 4px rgba(3, 40, 50, 0.4);
+  }
+
+  :global([data-theme='luna']) .start :global(svg) {
+    width: 28px;
+    height: 28px;
+  }
+
+  :global([data-theme='luna']) .start-label {
+    display: block;
+    color: #fff;
+    font-size: 17px;
+    font-weight: 700;
+    font-style: italic;
+    text-shadow: 1px 1px 2px rgba(0, 40, 10, 0.7);
+  }
+
+  :global([data-theme='luna']) .task {
+    border-color: rgba(4, 60, 70, 0.7);
+    background: linear-gradient(180deg, #5fd0d2, #25a2b0 20%, #1b93a3);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  }
+
+  :global([data-theme='luna']) .task:hover,
+  :global([data-theme='luna']) .task:focus-visible {
+    background: linear-gradient(180deg, #86e6e0, #35b6c2 20%, #26a5b4);
+  }
+
+  :global([data-theme='luna']) .task.active {
+    border-color: #04404e;
+    background: linear-gradient(180deg, #0a6477, #0e7c8f);
+    box-shadow: inset 0 2px 4px rgba(0, 30, 40, 0.5);
   }
 
   @media (max-width: 639px) {

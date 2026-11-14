@@ -1,8 +1,12 @@
+import ControlPanel from '../apps/ControlPanel.svelte';
 import Dialog from '../apps/Dialog.svelte';
 import Explorer from '../apps/Explorer.svelte';
+import HedgehogFinder from '../apps/HedgehogFinder.svelte';
+import MediaPlayer from '../apps/MediaPlayer.svelte';
 import Notepad from '../apps/Notepad.svelte';
 import RecycleBin from '../apps/RecycleBin.svelte';
 import SystemProperties from '../apps/SystemProperties.svelte';
+import Terminal from '../apps/Terminal.svelte';
 import { registerApps } from './registry';
 
 registerApps([
@@ -46,6 +50,50 @@ registerApps([
     height: 360,
     minWidth: 300,
     minHeight: 220
+  },
+  {
+    // The game sizes its own window to the board, so these are only the first guess.
+    id: 'hedgehog',
+    title: '고슴도치 찾기',
+    icon: 'hedgehog',
+    component: HedgehogFinder,
+    width: 284,
+    height: 412,
+    minWidth: 284,
+    minHeight: 412,
+    resizable: false
+  },
+  {
+    id: 'player',
+    title: '미디어 플레이어',
+    icon: 'player',
+    component: MediaPlayer,
+    width: 372,
+    height: 420,
+    minWidth: 372,
+    minHeight: 420,
+    resizable: false
+  },
+  {
+    id: 'terminal',
+    title: '터미널',
+    icon: 'terminal',
+    component: Terminal,
+    width: 640,
+    height: 400,
+    minWidth: 300,
+    minHeight: 200
+  },
+  {
+    id: 'control',
+    title: '제어판',
+    icon: 'control',
+    component: ControlPanel,
+    width: 452,
+    height: 540,
+    minWidth: 452,
+    minHeight: 540,
+    resizable: false
   },
   {
     id: 'dialog',

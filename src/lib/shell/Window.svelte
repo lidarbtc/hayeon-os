@@ -24,6 +24,7 @@
     if (event.button !== 0 || maximized) return;
     if (dir === null && (event.target as HTMLElement).closest('button')) return;
     gesture = { px: event.clientX, py: event.clientY, x: win.x, y: win.y, w: win.w, h: win.h, dir };
+    wm.heldId = win.id;
     (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
   }
 
@@ -54,6 +55,7 @@
 
   function end() {
     gesture = null;
+    wm.heldId = null;
   }
 
   function toggleMaximize(event: MouseEvent) {
@@ -326,6 +328,60 @@
     bottom: -3px;
     left: -3px;
     cursor: nesw-resize;
+  }
+
+  /* Luna: solid, saturated frames in place of glass. The frame keeps its size in both themes. */
+  :global([data-theme='luna']) .window {
+    border-color: #5d8088;
+    border-radius: 8px 8px 0 0;
+    background: linear-gradient(180deg, #a9cbd0 0, #86b0b8 30px, #8fb7be 100%);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: 0 4px 12px rgba(3, 40, 50, 0.3);
+  }
+
+  :global([data-theme='luna']) .window.active {
+    border-color: #064a5c;
+    background: linear-gradient(180deg, #4fdcc3 0, #14a6af 4px, #0b8799 14px, #0e95a6 26px, #0a7d90 30px, #0b8799 100%);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.28),
+      0 8px 24px rgba(3, 40, 50, 0.45);
+  }
+
+  :global([data-theme='luna']) .window.maximized {
+    border-radius: 0;
+  }
+
+  :global([data-theme='luna']) .title {
+    color: #fff;
+    font-weight: 700;
+    text-shadow: 1px 1px 1px #04404e;
+  }
+
+  :global([data-theme='luna']) .controls {
+    align-self: center;
+    gap: 2px;
+    border: 0;
+    border-radius: 0;
+    overflow: visible;
+    box-shadow: none;
+  }
+
+  :global([data-theme='luna']) .controls button {
+    width: 21px;
+    height: 21px;
+    border: 1px solid #fff;
+    border-radius: 3px;
+    background: linear-gradient(135deg, #7fe9d4, #12a0ad 55%, #0b7389);
+  }
+
+  :global([data-theme='luna']) .controls .close {
+    background: linear-gradient(135deg, #f5a898, #d9482f 55%, #a9260f);
+  }
+
+  :global([data-theme='luna']) .controls button:hover,
+  :global([data-theme='luna']) .controls button:focus-visible {
+    filter: brightness(1.2);
   }
 
   @keyframes open {

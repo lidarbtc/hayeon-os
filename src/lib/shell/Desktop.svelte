@@ -3,6 +3,7 @@
   import { opensImmediately } from '../os/pointer';
   import { getApp } from '../os/registry';
   import { session } from '../os/session.svelte';
+  import { settings } from '../os/settings.svelte';
   import { shortcuts, type Shortcut } from '../os/shell';
   import { wm } from '../os/wm.svelte';
   import Icon from '../ui/Icon.svelte';
@@ -11,7 +12,16 @@
   import Taskbar from './Taskbar.svelte';
   import Window from './Window.svelte';
 
-  const icons: Shortcut[] = [shortcuts.computer, shortcuts.documents, shortcuts.bin, shortcuts.notepad, shortcuts.readme];
+  const icons: Shortcut[] = [
+    shortcuts.computer,
+    shortcuts.documents,
+    shortcuts.bin,
+    shortcuts.notepad,
+    shortcuts.hedgehog,
+    shortcuts.player,
+    shortcuts.terminal,
+    shortcuts.readme
+  ];
 
   let areaWidth = $state(0);
   let areaHeight = $state(0);
@@ -30,6 +40,20 @@
     });
   });
 
+  // While gravity is on, windows fall a little further every frame.
+  $effect(() => {
+    if (!settings.gravity) return;
+    const snap = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const speeds = new Map<number, number>();
+    let last = performance.now();
+    let frame = requestAnimationFrame(function step(now) {
+      wm.fall(Math.min(0.032, (now - last) / 1000), speeds, snap);
+      last = now;
+      frame = requestAnimationFrame(step);
+    });
+    return () => cancelAnimationFrame(frame);
+  });
+
   function clickIcon(event: MouseEvent, icon: Shortcut) {
     selected = icon.id;
     if (opensImmediately(event)) icon.open();
@@ -41,7 +65,7 @@
   }
 </script>
 
-<div class="desktop">
+<div class="desktop" data-theme={settings.theme}>
   <Wallpaper />
 
   <div class="workarea" bind:clientWidth={areaWidth} bind:clientHeight={areaHeight}>
@@ -86,6 +110,8 @@
     inset: 0 0 var(--taskbar-h) 0;
     z-index: 1;
     overflow: hidden;
+    /* "hidden" still scrolls when a control inside a half-offscreen window takes focus. */
+    overflow: clip;
   }
 
   .icons {

@@ -42,6 +42,9 @@ export interface OpenOptions {
 /** How much of a title bar must stay inside the work area so a window can always be grabbed again. */
 const REACH = 96;
 const TITLE_H = 30;
+/** What a window adds around its content: borders, frame and title bar. */
+export const FRAME_W = 18;
+export const FRAME_H = 41;
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), Math.max(min, max));
@@ -57,6 +60,8 @@ class WindowManager {
   #topZ = 1;
   /** A guard returns false to veto closing its window, e.g. while it asks about unsaved changes. */
   #guards = new Map<number, () => boolean>();
+  /** The window the pointer is moving or resizing right now. Gravity leaves it alone. */
+  heldId: number | null = null;
 
   /** On phone-sized screens every resizable window fills the work area. */
   get compact() {
@@ -236,6 +241,46 @@ class WindowManager {
   setArea(w: number, h: number) {
     this.area = { w, h };
     for (const win of this.windows) this.move(win.id, win.x, win.y);
+  }
+
+  /** Give a fixed-size window the size its content asks for, kept inside the work area. */
+  fit(id: number, w: number, h: number) {
+    const win = this.#find(id);
+    if (!win) return;
+    win.w = Math.min(Math.round(w), this.area.w - 8);
+    win.h = Math.min(Math.round(h), this.area.h - 8);
+    win.minW = win.w;
+    win.minH = win.h;
+    win.x = clamp(win.x, 4, this.area.w - win.w - 4);
+    win.y = clamp(win.y, 0, this.area.h - win.h - 4);
+  }
+
+  /**
+   * One step of gravity: every free window accelerates towards the bottom of the
+   * work area and bounces a little when it lands. The caller keeps the speeds.
+   */
+  fall(dt: number, speeds: Map<number, number>, snap: boolean) {
+    if (this.compact) return;
+    for (const win of this.windows) {
+      if (win.dialog || win.maximized || win.minimized || win.id === this.heldId) {
+        speeds.delete(win.id);
+        continue;
+      }
+      const floor = Math.max(0, this.area.h - win.h);
+      const speed = speeds.get(win.id) ?? 0;
+      if (snap || (speed === 0 && win.y >= floor)) {
+        if (win.y !== floor) win.y = floor;
+        continue;
+      }
+      let next = speed + 2600 * dt;
+      let y = win.y + next * dt;
+      if (y >= floor) {
+        y = floor;
+        next = next > 240 ? -next * 0.32 : 0;
+      }
+      win.y = y;
+      speeds.set(win.id, next);
+    }
   }
 
   reset() {
