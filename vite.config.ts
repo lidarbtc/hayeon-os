@@ -13,33 +13,38 @@ function inlineIntoHtml(): Plugin {
   return {
     name: 'hayeon-os:inline',
     apply: 'build',
-    enforce: 'post',
-    generateBundle(_options, bundle) {
-      const page = bundle['index.html'];
-      if (page?.type !== 'asset') return;
+    // order 'post' runs this after Vite's own generateBundle hooks, which still
+    // have placeholders to fill in the script.
+    generateBundle: {
+      order: 'post',
+      handler(_options, bundle) {
+        const page = bundle['index.html'];
+        if (page?.type !== 'asset') return;
 
-      const take = (file: string) => {
-        const item = bundle[file];
-        if (!item) return null;
-        delete bundle[file];
-        return item.type === 'chunk' ? item.code : String(item.source);
-      };
+        const take = (file: string) => {
+          const item = bundle[file];
+          if (!item) return null;
+          delete bundle[file];
+          return item.type === 'chunk' ? item.code : String(item.source);
+        };
 
-      let html = String(page.source);
-      html = html.replace(/<script type="module"[^>]*\ssrc="\.\/([^"]+)"[^>]*><\/script>/g, (tag, file: string) => {
-        const code = take(file);
-        if (code === null) return tag;
-        // "\x3C" reads as "<" in strings, templates and regular expressions alike,
-        // and keeps the HTML parser from ending the script early.
-        return '<script type="module">' + code.replace(/<(?=\/script|!--)/gi, '\\x3C') + '</script>';
-      });
-      html = html.replace(/<link rel="stylesheet"[^>]*\shref="\.\/([^"]+)"[^>]*>/g, (tag, file: string) => {
-        const css = take(file);
-        return css === null ? tag : '<style>' + css.replace(/<(?=\/style)/gi, '\\3C ') + '</style>';
-      });
-      // The service worker compares this number to tell a newer build from an older one.
-      html = html.replace('</head>', '  <meta name="build" content="' + Date.now() + '" />\n  </head>');
-      page.source = html;
+        let html = String(page.source);
+        html = html.replace(/<script type="module"[^>]*\ssrc="\.\/([^"]+)"[^>]*><\/script>/g, (tag, file: string) => {
+          const code = take(file);
+          if (code === null) return tag;
+          // "\x3C" reads as "<" in strings, templates and regular expressions alike,
+          // and keeps the HTML parser from ending the script early.
+          return '<script type="module">' + code.replace(/<(?=\/script|!--)/gi, '\\x3C') + '</script>';
+        });
+        html = html.replace(/<link rel="stylesheet"[^>]*\shref="\.\/([^"]+)"[^>]*>/g, (tag, file: string) => {
+          const css = take(file);
+          return css === null ? tag : '<style>' + css.replace(/<(?=\/style)/gi, '\\3C ') + '</style>';
+        });
+        if (html.includes('__VITE_')) this.error('index.html was inlined before Vite finished with the script.');
+        // The service worker compares this number to tell a newer build from an older one.
+        html = html.replace('</head>', '  <meta name="build" content="' + Date.now() + '" />\n  </head>');
+        page.source = html;
+      }
     }
   };
 }
