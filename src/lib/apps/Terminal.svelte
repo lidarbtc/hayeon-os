@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { locale, t } from '../os/i18n';
   import { REPO_URL } from '../os/about';
   import { BUILD_TIME, DOCUMENTS, displayPath, drives, staticFolder } from '../os/disk';
   import { fileSize, fs } from '../os/fs.svelte';
@@ -19,9 +20,9 @@
 
   let lines = $state<Line[]>([
     { text: VERSION },
-    { text: '정하연을 좋아하는 팬이 만든 컴퓨터.' },
+    { text: t('정하연을 좋아하는 팬이 만든 컴퓨터.', 'A computer made by a fan of Jeong HaYeon.') },
     { text: '' },
-    { text: 'help 를 입력하면 명령어 목록이 나옵니다.' },
+    { text: t('help 를 입력하면 명령어 목록이 나옵니다.', 'Type help for a list of commands.') },
     { text: '' }
   ]);
   /** The current folder, as an internal path such as "C:" or "C:/HaYeon OS". */
@@ -68,8 +69,8 @@
       parts = [];
     }
     const info = drives.find((item) => item.letter + ':' === drive);
-    if (!info) return { error: '시스템이 지정된 드라이브를 찾을 수 없습니다.' };
-    if (info.type !== 'disk') return { error: '장치가 준비되지 않았습니다.' };
+    if (!info) return { error: t('시스템이 지정된 드라이브를 찾을 수 없습니다.', 'The system cannot find the drive specified.') };
+    if (info.type !== 'disk') return { error: t('장치가 준비되지 않았습니다.', 'The device is not ready.') };
     for (const part of rest.split('/')) {
       if (part === '' || part === '.') continue;
       if (part === '..') {
@@ -78,13 +79,13 @@
       }
       const here = [drive, ...parts].join('/');
       const match = staticFolder(here)?.folders.find((name) => name.toLowerCase() === part.toLowerCase());
-      if (!match) return { error: '지정된 경로를 찾을 수 없습니다.' };
+      if (!match) return { error: t('지정된 경로를 찾을 수 없습니다.', 'The system cannot find the path specified.') };
       parts.push(match);
     }
     return { path: [drive, ...parts].join('/') };
   }
 
-  const stampFormat = new Intl.DateTimeFormat('ko-KR', {
+  const stampFormat = new Intl.DateTimeFormat(locale, {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -108,14 +109,15 @@
         files++;
       }
     }
+    const shown = displayPath(target.path) + (target.path.length === 2 ? '\\' : '');
     print(
       [
-        ' ' + target.path[0] + ' 드라이브의 볼륨: ' + (drive?.label ?? ''),
-        ' ' + displayPath(target.path) + (target.path.length === 2 ? '\\' : '') + ' 디렉터리',
+        t(' ' + target.path[0] + ' 드라이브의 볼륨: ', ' Volume in drive ' + target.path[0] + ' is ') + (drive?.label ?? ''),
+        t(' ' + shown + ' 디렉터리', ' Directory of ' + shown),
         '',
         ...rows,
-        '               ' + files + '개 파일',
-        '               ' + (folder?.folders.length ?? 0) + '개 디렉터리',
+        '               ' + files + t('개 파일', ' File(s)'),
+        '               ' + (folder?.folders.length ?? 0) + t('개 디렉터리', ' Dir(s)'),
         ''
       ].join('\n')
     );
@@ -129,7 +131,7 @@
   }
 
   function type(arg: string) {
-    if (!arg) return fail('명령 구문이 올바르지 않습니다.');
+    if (!arg) return fail(t('명령 구문이 올바르지 않습니다.', 'The syntax of the command is incorrect.'));
     const raw = arg.replace(/^"|"$/g, '').replaceAll('\\', '/');
     const slash = raw.lastIndexOf('/');
     const name = raw.slice(slash + 1).toLowerCase();
@@ -137,24 +139,24 @@
     if ('error' in where) return fail(where.error);
     const shipped = staticFolder(where.path)?.files.find((file) => file.name.toLowerCase() === name);
     if (shipped) {
-      if (shipped.content === undefined) return fail('액세스가 거부되었습니다.');
+      if (shipped.content === undefined) return fail(t('액세스가 거부되었습니다.', 'Access is denied.'));
       return print(shipped.content);
     }
     const written = where.path === DOCUMENTS ? fs.byName(name) : undefined;
-    if (!written) return fail('지정된 파일을 찾을 수 없습니다.');
+    if (!written) return fail(t('지정된 파일을 찾을 수 없습니다.', 'The system cannot find the file specified.'));
     print(written.content);
   }
 
   const programs: [string[], Shortcut][] = [
     [['notepad', '메모장'], shortcuts.notepad],
-    [['photos', '사진', '내 사진'], shortcuts.photos],
+    [['photos', 'pictures', '사진', '내 사진'], shortcuts.photos],
     [['profile', '프로필'], shortcuts.profile],
     [['guestbook', '방명록'], shortcuts.guestbook],
     [['hedgehog', '고슴도치', '고슴도치 찾기'], shortcuts.hedgehog],
     [['player', '미디어', '미디어 플레이어'], shortcuts.player],
     [['control', '제어판'], shortcuts.control],
-    [['explorer', '내 컴퓨터'], shortcuts.computer],
-    [['bin', '휴지통'], shortcuts.bin],
+    [['explorer', 'computer', '내 컴퓨터'], shortcuts.computer],
+    [['bin', 'recycle', '휴지통'], shortcuts.bin],
     [['system', '시스템', '시스템 속성'], shortcuts.system]
   ];
 
@@ -163,8 +165,8 @@
     const program = programs.find(([names]) => names.includes(wanted));
     if (!program) {
       return fail(
-        (arg ? "'" + arg + "'을(를) 찾을 수 없습니다. " : '') +
-          '열 수 있는 프로그램: ' +
+        (arg ? t("'" + arg + "'을(를) 찾을 수 없습니다. ", "Cannot find '" + arg + "'. ") : '') +
+          t('열 수 있는 프로그램: ', 'Programs you can open: ') +
           programs.map(([names]) => names[0]).join(', ')
       );
     }
@@ -174,18 +176,18 @@
   function theme(arg: string) {
     const wanted = arg.toLowerCase();
     if (wanted === 'aero' || wanted === 'luna') settings.setTheme(wanted);
-    else if (wanted) return fail('쓸 수 있는 테마: aero, luna');
-    print('테마: ' + settings.theme);
+    else if (wanted) return fail(t('쓸 수 있는 테마: aero, luna', 'Available themes: aero, luna'));
+    print(t('테마: ', 'Theme: ') + settings.theme);
   }
 
   function gravity(arg: string) {
     const wanted = arg.toLowerCase();
     if (wanted === 'on' || wanted === 'off') settings.gravity = wanted === 'on';
-    else if (wanted) return fail('사용법: gravity on 또는 gravity off');
-    print('중력: ' + (settings.gravity ? '켜짐' : '꺼짐'));
+    else if (wanted) return fail(t('사용법: gravity on 또는 gravity off', 'Usage: gravity on or gravity off'));
+    print(t('중력: ', 'Gravity: ') + (settings.gravity ? t('켜짐', 'on') : t('꺼짐', 'off')));
   }
 
-  const HELP = [
+  const HELP_KO = [
     '명령어 목록',
     '  HELP      이 목록을 보여 줍니다.',
     '  DIR       파일과 폴더 목록을 보여 줍니다.',
@@ -206,6 +208,29 @@
     ''
   ].join('\n');
 
+  const HELP_EN = [
+    'Commands',
+    '  HELP      Shows this list.',
+    '  DIR       Lists the files and folders.',
+    '  CD        Changes folder. e.g. cd HaYeon OS',
+    '  TYPE      Shows what a text file says.',
+    '  START     Opens a program. e.g. start notepad',
+    '  ECHO      Repeats what you type.',
+    '  WHOAMI    Shows who you are.',
+    '  HOSTNAME  Shows the computer name.',
+    '  VER       Shows the version.',
+    '  DATE      Shows today’s date.',
+    '  TIME      Shows the time.',
+    '  THEME     Changes the theme. e.g. theme luna',
+    '  GRAVITY   Gravity on/off. e.g. gravity on',
+    '  SOURCE    Shows where the code lives.',
+    '  CLS       Clears the screen.',
+    '  EXIT      Closes the terminal.',
+    ''
+  ].join('\n');
+
+  const HELP = t(HELP_KO, HELP_EN);
+
   const commands: Record<string, (arg: string) => void> = {
     help: () => print(HELP),
     dir,
@@ -220,15 +245,15 @@
     whoami: () => print('hayeon.eth\\s19'),
     hostname: () => print('hayeon.eth'),
     ver: () => print('\n' + VERSION + '\n'),
-    date: () => print(new Intl.DateTimeFormat('ko-KR', { dateStyle: 'full' }).format(new Date())),
-    time: () => print(new Intl.DateTimeFormat('ko-KR', { timeStyle: 'medium' }).format(new Date())),
+    date: () => print(new Intl.DateTimeFormat(locale, { dateStyle: 'full' }).format(new Date())),
+    time: () => print(new Intl.DateTimeFormat(locale, { timeStyle: 'medium' }).format(new Date())),
     theme,
     gravity,
     source: () => print(REPO_URL),
     cls: () => (lines = []),
     clear: () => (lines = []),
     exit: () => wm.requestClose(win.id),
-    sudo: () => fail('이 컴퓨터에는 관리자가 없습니다. 고슴도치만 있습니다.')
+    sudo: () => fail(t('이 컴퓨터에는 관리자가 없습니다. 고슴도치만 있습니다.', 'This computer has no administrator. Only hedgehogs.'))
   };
 
   function run(raw: string) {
@@ -244,7 +269,13 @@
     const arg = space < 0 ? '' : text.slice(space + 1).trim();
     const command = Object.hasOwn(commands, name) ? commands[name] : undefined;
     if (command) command(arg);
-    else fail("'" + name + "'은(는) 내부 또는 외부 명령, 실행할 수 있는 프로그램, 또는\n배치 파일이 아닙니다.");
+    else
+      fail(
+        t(
+          "'" + name + "'은(는) 내부 또는 외부 명령, 실행할 수 있는 프로그램, 또는\n배치 파일이 아닙니다.",
+          "'" + name + "' is not recognized as an internal or external command,\noperable program or batch file."
+        )
+      );
   }
 
   function keydown(event: KeyboardEvent) {
@@ -280,7 +311,7 @@
     <input
       bind:this={field}
       bind:value={input}
-      aria-label="명령어"
+      aria-label={t('명령어', 'Command')}
       spellcheck="false"
       autocomplete="off"
       autocapitalize="off"

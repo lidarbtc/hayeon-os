@@ -1,5 +1,6 @@
 // The read-only part of the machine: drives, system folders and the files that
 // ship with HaYeon OS. Paths use forward slashes internally ("C:/HaYeon OS").
+import { t } from './i18n';
 
 export interface Drive {
   letter: string;
@@ -21,8 +22,8 @@ export const drives: Drive[] = [
   { letter: 'E', label: 'EVER01', type: 'cd' }
 ];
 
-export const DOCUMENTS = 'C:/내 문서';
-export const README = 'C:/HaYeon OS/읽어보기.txt';
+export const DOCUMENTS = t('C:/내 문서', 'C:/My Documents');
+export const README = t('C:/HaYeon OS/읽어보기.txt', 'C:/HaYeon OS/Readme.txt');
 /** Everything that ships with the system carries the build date, 2007-08-01. */
 export const BUILD_TIME = new Date(2007, 7, 1, 0, 19).getTime();
 
@@ -38,7 +39,7 @@ export interface StaticFolder {
   files: StaticFile[];
 }
 
-const readme = [
+const readmeKo = [
   'HaYeon OS S19에 오신 것을 환영합니다.',
   '',
   '정하연을 좋아하는 팬이 만든 작은 컴퓨터입니다.',
@@ -63,6 +64,33 @@ const readme = [
   'Build 20070801'
 ].join('\n');
 
+const readmeEn = [
+  'Welcome to HaYeon OS S19.',
+  '',
+  'A little computer made by a fan of Jeong HaYeon.',
+  'Double-click an icon to open it. Take your time and look around.',
+  '',
+  '[Things to try]',
+  '- My Pictures: flip through photos of HaYeon and set one as your wallpaper',
+  '- Profile: look back at the road HaYeon has walked so far',
+  '- Guestbook: stick up a note and read the notes others left',
+  '- Write in Notepad and save it to My Documents',
+  '- Look around the drives and folders in My Computer',
+  '- Throw files in the Recycle Bin, then take them back out',
+  '- Look this computer over in System Properties',
+  '- Hedgehog Finder: open every empty square without stepping on a hedgehog',
+  '- Media Player: tripleS songs HaYeon sang on, played again by this computer as glassy electronic remixes',
+  '- Terminal: type help and try out the commands',
+  '- Control Panel: change the theme and the wallpaper, switch gravity on',
+  '- Drag windows around, and pull at their edges to resize them',
+  '',
+  'What you write in Notepad is saved only on this device.',
+  '',
+  'Build 20070801'
+].join('\n');
+
+const readme = t(readmeKo, readmeEn);
+
 const bootIni = [
   '[boot loader]',
   'timeout=19',
@@ -73,12 +101,12 @@ const bootIni = [
 ].join('\n');
 
 const tree: Record<string, StaticFolder> = {
-  'C:': { folders: ['HaYeon OS', '내 문서'], files: [] },
+  'C:': { folders: ['HaYeon OS', t('내 문서', 'My Documents')], files: [] },
   'C:/HaYeon OS': {
     folders: ['System19'],
     files: [
       { name: 'boot.ini', size: '1KB', content: bootIni },
-      { name: '읽어보기.txt', size: '1KB', content: readme }
+      { name: t('읽어보기.txt', 'Readme.txt'), size: '1KB', content: readme }
     ]
   },
   'C:/HaYeon OS/System19': {
@@ -124,7 +152,7 @@ export function displayPath(path: string) {
 
 /** The name a folder window shows: the drive title for a drive root, else the folder name. */
 export function folderTitle(path: string) {
-  if (path === '') return '내 컴퓨터';
+  if (path === '') return t('내 컴퓨터', 'My Computer');
   const drive = drives.find((d) => d.letter + ':' === path);
   return drive ? driveTitle(drive) : baseName(path);
 }

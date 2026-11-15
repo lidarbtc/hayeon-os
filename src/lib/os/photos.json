@@ -9,7 +9,12 @@
     "source": "https://x.com/triplescosmos/status/1940682823842910246",
     "w": 1093,
     "h": 1498,
-    "focus": "55% 38%"
+    "focus": "55% 38%",
+    "en": {
+      "title": "Hanoi 1",
+      "album": "Loving Hanoi",
+      "caption": "What HaYeon posted on the official account: “Loving Hanoi😘”"
+    }
   },
   {
     "id": "hayeon-hanoi-2",
@@ -21,7 +26,12 @@
     "source": "https://x.com/triplescosmos/status/1940682823842910246",
     "w": 1127,
     "h": 1453,
-    "focus": "45% 38%"
+    "focus": "45% 38%",
+    "en": {
+      "title": "Hanoi 2",
+      "album": "Loving Hanoi",
+      "caption": "What HaYeon posted on the official account: “Loving Hanoi😘”"
+    }
   },
   {
     "id": "hayeon-hanoi-3",
@@ -33,7 +43,12 @@
     "source": "https://x.com/triplescosmos/status/1940682823842910246",
     "w": 1140,
     "h": 1436,
-    "focus": "60% 38%"
+    "focus": "60% 38%",
+    "en": {
+      "title": "Hanoi 3",
+      "album": "Loving Hanoi",
+      "caption": "What HaYeon posted on the official account: “Loving Hanoi😘”"
+    }
   },
   {
     "id": "hayeon-rolex-1",
@@ -46,7 +61,12 @@
     "w": 1080,
     "h": 1440,
     "focus": "55% 24%",
-    "avatar": true
+    "avatar": true,
+    "en": {
+      "title": "Rolex HaYeon 1",
+      "album": "Rolex HaYeon",
+      "caption": "What HaYeon posted on the official account: “Rolex HaYeon⌚️✨”"
+    }
   },
   {
     "id": "hayeon-rolex-2",
@@ -58,7 +78,12 @@
     "source": "https://x.com/triplescosmos/status/1863931002604937535",
     "w": 1101,
     "h": 1440,
-    "focus": "45% 35%"
+    "focus": "45% 35%",
+    "en": {
+      "title": "Rolex HaYeon 2",
+      "album": "Rolex HaYeon",
+      "caption": "What HaYeon posted on the official account: “Rolex HaYeon⌚️✨”"
+    }
   },
   {
     "id": "hayeon-rolex-3",
@@ -70,7 +95,12 @@
     "source": "https://x.com/triplescosmos/status/1863931002604937535",
     "w": 1104,
     "h": 1440,
-    "focus": "50% 50%"
+    "focus": "50% 50%",
+    "en": {
+      "title": "Rolex HaYeon 3",
+      "album": "Rolex HaYeon",
+      "caption": "What HaYeon posted on the official account: “Rolex HaYeon⌚️✨”"
+    }
   },
   {
     "id": "hayeon-japan-1",
@@ -82,7 +112,12 @@
     "source": "https://x.com/triplescosmos/status/1818218194831810696",
     "w": 666,
     "h": 888,
-    "focus": "60% 35%"
+    "focus": "60% 35%",
+    "en": {
+      "title": "HaYeon in Japan 1",
+      "album": "HaYeon in Japan",
+      "caption": "What HaYeon posted on the official account: “HaYeon in Japan😼”"
+    }
   },
   {
     "id": "hayeon-japan-2",
@@ -94,7 +129,12 @@
     "source": "https://x.com/triplescosmos/status/1818218194831810696",
     "w": 1036,
     "h": 617,
-    "focus": "52% 40%"
+    "focus": "52% 40%",
+    "en": {
+      "title": "HaYeon in Japan 2",
+      "album": "HaYeon in Japan",
+      "caption": "What HaYeon posted on the official account: “HaYeon in Japan😼”"
+    }
   },
   {
     "id": "hayeon-s19-reveal",
@@ -106,6 +146,11 @@
     "source": "https://x.com/triplescosmos/status/1738529887881929036",
     "w": 1067,
     "h": 1600,
-    "focus": "50% 22%"
+    "focus": "50% 22%",
+    "en": {
+      "title": "S19 reveal photo",
+      "album": "S19 Reveal",
+      "caption": "The day she was first introduced as the nineteenth member of tripleS."
+    }
   }
 ]

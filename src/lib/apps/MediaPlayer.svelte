@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from '../os/i18n';
   import { untrack } from 'svelte';
   import { player, songs, type Song } from '../os/player.svelte';
   import { wm, type Win } from '../os/wm.svelte';
@@ -19,7 +20,7 @@
   const albums = (() => {
     const groups: { label: string; items: { song: Song; index: number }[] }[] = [];
     songs.forEach((item, index) => {
-      const label = item.pattern ? 'HaYeon OS 기본 음악' : item.year + ' · ' + (item.unit ? item.unit + ' · ' : '') + item.album;
+      const label = item.pattern ? t('HaYeon OS 기본 음악', 'HaYeon OS Music') : item.year + ' · ' + (item.unit ? item.unit + ' · ' : '') + item.album;
       const last = groups[groups.length - 1];
       if (last?.label === label) last.items.push({ song: item, index });
       else groups.push({ label, items: [{ song: item, index }] });
@@ -28,7 +29,7 @@
   })();
 
   $effect(() => {
-    const title = song.title + ' - 미디어 플레이어';
+    const title = song.title + t(' - 미디어 플레이어', ' - Media Player');
     untrack(() => wm.patch(win.id, { title }));
   });
 
@@ -102,7 +103,7 @@
       max={Math.round(song.seconds)}
       step="1"
       value={scrub ?? clock}
-      aria-label="재생 위치"
+      aria-label={t('재생 위치', 'Position')}
       oninput={(event) => (scrub = Number(event.currentTarget.value))}
       onchange={(event) => {
         // Move the clock with the handle so quick key presses add up.
@@ -114,9 +115,9 @@
     <div class="now">
       <span class="name">
         {#if player.failed}
-          곡을 불러오지 못했습니다
+          {t('곡을 불러오지 못했습니다', 'Couldn’t load this song')}
         {:else if player.loading}
-          {song.title} · 불러오는 중…
+          {song.title} · {t('불러오는 중…', 'Loading…')}
         {:else}
           {song.title}
         {/if}
@@ -126,13 +127,13 @@
   </div>
 
   <div class="controls">
-    <button aria-label="이전 곡" title="이전 곡" onclick={() => player.skip(-1)}>
+    <button aria-label={t('이전 곡', 'Previous')} title={t('이전 곡', 'Previous')} onclick={() => player.skip(-1)}>
       <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 3h2v10H3zM13 3v10L6 8z" /></svg>
     </button>
     <button
       class="main"
-      aria-label={player.playing ? '일시 정지' : '재생'}
-      title={player.playing ? '일시 정지' : '재생'}
+      aria-label={player.playing ? t('일시 정지', 'Pause') : t('재생', 'Play')}
+      title={player.playing ? t('일시 정지', 'Pause') : t('재생', 'Play')}
       onclick={() => player.toggle()}
     >
       <svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true">
@@ -143,14 +144,14 @@
         {/if}
       </svg>
     </button>
-    <button aria-label="정지" title="정지" onclick={() => player.stop()}>
+    <button aria-label={t('정지', 'Stop')} title={t('정지', 'Stop')} onclick={() => player.stop()}>
       <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 4h8v8H4z" /></svg>
     </button>
-    <button aria-label="다음 곡" title="다음 곡" onclick={() => player.skip(1)}>
+    <button aria-label={t('다음 곡', 'Next')} title={t('다음 곡', 'Next')} onclick={() => player.skip(1)}>
       <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M11 3h2v10h-2zM3 3v10l7-5z" /></svg>
     </button>
     <label class="volume">
-      <span>음량</span>
+      <span>{t('음량', 'Volume')}</span>
       <input
         type="range"
         min="0"
@@ -179,7 +180,7 @@
     {/each}
   </div>
 
-  <div class="statusbar"><span>녹음이 아니라, 이 컴퓨터가 음표를 읽어 직접 연주하는 리믹스입니다.</span></div>
+  <div class="statusbar"><span>{t('녹음이 아니라, 이 컴퓨터가 음표를 읽어 직접 연주하는 리믹스입니다.', 'Remixes played live from the notes, not recordings.')}</span></div>
 </div>
 
 <style>

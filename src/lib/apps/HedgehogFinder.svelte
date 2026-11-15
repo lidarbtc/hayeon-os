@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from '../os/i18n';
   import { untrack } from 'svelte';
   import { emptyBoard, levels, neighbours, plant, reveal, type Cell, type Level, type LevelId } from '../os/hog';
   import type { Menu } from '../os/types';
@@ -35,9 +36,12 @@
   const flags = $derived(cells.filter((cell) => cell.flag).length);
   const over = $derived(phase === 'won' || phase === 'lost');
   const status = $derived.by(() => {
-    if (phase === 'won') return '모두 찾았습니다! ' + seconds + '초' + (newRecord ? ' (새 기록)' : '');
-    if (phase === 'lost') return '앗, 따가워!';
-    return '고슴도치 ' + level.hogs + '마리가 숨어 있습니다.';
+    if (phase === 'won')
+      return (
+        t('모두 찾았습니다! ' + seconds + '초', 'You found them all! ' + seconds + ' s') + (newRecord ? t(' (새 기록)', ' (new record)') : '')
+      );
+    if (phase === 'lost') return t('앗, 따가워!', 'Ouch, that’s prickly!');
+    return t('고슴도치 ' + level.hogs + '마리가 숨어 있습니다.', level.hogs + ' hedgehogs are hiding.');
   });
 
   $effect(() => {
@@ -139,9 +143,11 @@
   }
 
   function label(cell: Cell, index: number) {
-    const where = Math.floor(index / level.cols) + 1 + '행 ' + ((index % level.cols) + 1) + '열, ';
-    if (cell.open) return where + (cell.hog ? '고슴도치' : cell.near ? '주변에 ' + cell.near + '마리' : '빈 칸');
-    return where + (cell.flag ? '깃발' : '닫힘');
+    const row = Math.floor(index / level.cols) + 1;
+    const column = (index % level.cols) + 1;
+    const where = t(row + '행 ' + column + '열, ', 'Row ' + row + ', column ' + column + ', ');
+    if (cell.open) return where + (cell.hog ? t('고슴도치', 'hedgehog') : cell.near ? t('주변에 ' + cell.near + '마리', cell.near + ' nearby') : t('빈 칸', 'empty'));
+    return where + (cell.flag ? t('깃발', 'flagged') : t('닫힘', 'closed'));
   }
 
   function lcd(value: number) {
@@ -152,10 +158,10 @@
     wm.dialog({
       key: 'records:' + win.id,
       owner: win.id,
-      title: '최고 기록',
+      title: t('최고 기록', 'Best Times'),
       icon: 'hedgehog',
       message: levels
-        .map((item) => item.label + ': ' + (records[item.id] === undefined ? '기록 없음' : records[item.id] + '초'))
+        .map((item) => item.label + ': ' + (records[item.id] === undefined ? t('기록 없음', 'No record') : records[item.id] + t('초', ' s')))
         .join('\n')
     });
   }
@@ -164,33 +170,39 @@
     wm.dialog({
       key: 'help:' + win.id,
       owner: win.id,
-      title: '놀이 방법',
+      title: t('놀이 방법', 'How to Play'),
       kind: 'info',
       message:
-        '고슴도치를 밟지 않고 빈 칸을 모두 열면 됩니다.\n\n' +
-        '숫자는 주변 여덟 칸에 숨은 고슴도치 수입니다.\n' +
-        '고슴도치가 있을 것 같은 칸에는 깃발을 꽂으세요.\n\n' +
-        '깃발: 마우스 오른쪽 단추, F 키, 또는 깃발 단추를 켜고 누르기'
+        t(
+          '고슴도치를 밟지 않고 빈 칸을 모두 열면 됩니다.\n\n' +
+            '숫자는 주변 여덟 칸에 숨은 고슴도치 수입니다.\n' +
+            '고슴도치가 있을 것 같은 칸에는 깃발을 꽂으세요.\n\n' +
+            '깃발: 마우스 오른쪽 단추, F 키, 또는 깃발 단추를 켜고 누르기',
+          'Open every empty square without stepping on a hedgehog.\n\n' +
+            'A number tells how many hedgehogs hide in the eight squares around it.\n' +
+            'Put a flag on any square you think hides a hedgehog.\n\n' +
+            'Flag: right-click, press F, or switch on the flag button and tap.'
+        )
     });
   }
 
   const menus = $derived<Menu[]>([
     {
-      label: '게임',
+      label: t('게임', 'Game'),
       items: [
-        { label: '새 게임', action: () => start() },
+        { label: t('새 게임', 'New Game'), action: () => start() },
         { separator: true },
         ...levels.map((item) => ({
-          label: item.label + ' (' + item.cols + '×' + item.rows + ', ' + item.hogs + '마리)',
+          label: item.label + ' (' + item.cols + '×' + item.rows + ', ' + item.hogs + t('마리)', ')'),
           checked: item.id === level.id,
           action: () => start(item)
         })),
         { separator: true },
-        { label: '최고 기록', action: showRecords },
-        { label: '끝내기', action: () => wm.requestClose(win.id) }
+        { label: t('최고 기록', 'Best Times'), action: showRecords },
+        { label: t('끝내기', 'Exit'), action: () => wm.requestClose(win.id) }
       ]
     },
-    { label: '도움말', items: [{ label: '놀이 방법', action: showHelp }] }
+    { label: t('도움말', 'Help'), items: [{ label: t('놀이 방법', 'How to Play'), action: showHelp }] }
   ]);
 </script>
 
@@ -210,23 +222,23 @@
   <div class="scroll">
     <div class="table" bind:offsetWidth={tableW} bind:offsetHeight={tableH}>
       <div class="head">
-        <span class="lcd" title="남은 고슴도치">{lcd(level.hogs - flags)}</span>
+        <span class="lcd" title={t('남은 고슴도치', 'Hedgehogs left')}>{lcd(level.hogs - flags)}</span>
         <div class="middle">
-          <button class="face" class:lost={phase === 'lost'} aria-label="새 게임" title="새 게임" onclick={() => start()}>
+          <button class="face" class:lost={phase === 'lost'} aria-label={t('새 게임', 'New Game')} title={t('새 게임', 'New Game')} onclick={() => start()}>
             <Icon name="hedgehog" size={30} />
           </button>
           <button
             class="mode"
             class:on={flagMode}
-            aria-label="깃발 꽂기"
+            aria-label={t('깃발 꽂기', 'Flag mode')}
             aria-pressed={flagMode}
-            title="켜면 누르는 칸에 깃발을 꽂습니다"
+            title={t('켜면 누르는 칸에 깃발을 꽂습니다', 'When on, a tap plants a flag')}
             onclick={() => (flagMode = !flagMode)}
           >
             {@render flag(false)}
           </button>
         </div>
-        <span class="lcd" title="걸린 시간">{lcd(seconds)}</span>
+        <span class="lcd" title={t('걸린 시간', 'Time')}>{lcd(seconds)}</span>
       </div>
 
       <!-- svelte-ignore a11y_no_static_element_interactions -->

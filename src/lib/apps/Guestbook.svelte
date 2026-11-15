@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { locale, t } from '../os/i18n';
   import { colors, guestbook, MAX_NAME, MAX_TEXT, type Note, type NoteColor } from '../os/guestbook.svelte';
   import { wm, type Win } from '../os/wm.svelte';
 
@@ -9,7 +10,13 @@
   let message = $state('');
   let now = $state(Date.now());
 
-  const colorNames: Record<NoteColor, string> = { mint: '민트', lemon: '레몬', pink: '분홍', sky: '하늘', lilac: '연보라' };
+  const colorNames: Record<NoteColor, string> = {
+    mint: t('민트', 'Mint'),
+    lemon: t('레몬', 'Lemon'),
+    pink: t('분홍', 'Pink'),
+    sky: t('하늘', 'Sky'),
+    lilac: t('연보라', 'Lilac')
+  };
   const length = $derived([...text].length);
 
   $effect(() => {
@@ -27,9 +34,9 @@
 
   const status = $derived.by(() => {
     if (message) return message;
-    if (guestbook.busy) return '쪽지를 접는 중…';
-    if (guestbook.relays) return '쪽지 ' + guestbook.notes.length + '장';
-    return guestbook.settled ? '연결하지 못했습니다. 계속 시도하는 중…' : '연결하는 중…';
+    if (guestbook.busy) return t('쪽지를 접는 중…', 'Folding your note…');
+    if (guestbook.relays) return t('쪽지 ' + guestbook.notes.length + '장', guestbook.notes.length + (guestbook.notes.length === 1 ? ' note' : ' notes'));
+    return guestbook.settled ? t('연결하지 못했습니다. 계속 시도하는 중…', 'Couldn’t connect. Still trying…') : t('연결하는 중…', 'Connecting…');
   });
 
   async function submit(event: SubmitEvent) {
@@ -42,27 +49,27 @@
       return;
     }
     text = '';
-    message = '붙였습니다.';
+    message = t('붙였습니다.', 'Posted.');
   }
 
   function remove(note: Note) {
     wm.dialog({
       key: 'remove:' + note.key,
       owner: win.id,
-      title: '쪽지 떼기',
+      title: t('쪽지 떼기', 'Peel Off Note'),
       kind: 'question',
-      message: '이 쪽지를 뗄까요?\n\n“' + note.text + '”',
-      buttons: [{ label: '떼기', primary: true, action: () => void guestbook.remove(note) }, { label: '취소' }]
+      message: t('이 쪽지를 뗄까요?', 'Peel off this note?') + '\n\n“' + note.text + '”',
+      buttons: [{ label: t('떼기', 'Peel Off'), primary: true, action: () => void guestbook.remove(note) }, { label: t('취소', 'Cancel') }]
     });
   }
 
   function ago(at: number) {
     const minutes = Math.floor((now - at) / 60_000);
-    if (minutes < 1) return '방금';
-    if (minutes < 60) return minutes + '분 전';
-    if (minutes < 60 * 24) return Math.floor(minutes / 60) + '시간 전';
-    if (minutes < 60 * 24 * 7) return Math.floor(minutes / (60 * 24)) + '일 전';
-    return new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium' }).format(at);
+    if (minutes < 1) return t('방금', 'just now');
+    if (minutes < 60) return t(minutes + '분 전', minutes + ' min ago');
+    if (minutes < 60 * 24) return t(Math.floor(minutes / 60) + '시간 전', Math.floor(minutes / 60) + ' h ago');
+    if (minutes < 60 * 24 * 7) return t(Math.floor(minutes / (60 * 24)) + '일 전', Math.floor(minutes / (60 * 24)) + ' d ago');
+    return new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(at);
   }
 </script>
 
@@ -72,12 +79,12 @@
       bind:value={text}
       rows="2"
       maxlength={MAX_TEXT}
-      placeholder="하연에게, 또는 다녀간 흔적 한마디"
-      aria-label="쪽지 내용"
+      placeholder={t('하연에게, 또는 다녀간 흔적 한마디', 'A word for HaYeon, or a sign you were here')}
+      aria-label={t('쪽지 내용', 'Note')}
     ></textarea>
     <div class="tools">
-      <input bind:value={guestbook.name} maxlength={MAX_NAME} placeholder="닉네임" aria-label="닉네임" />
-      <div class="swatches" role="radiogroup" aria-label="쪽지 색">
+      <input bind:value={guestbook.name} maxlength={MAX_NAME} placeholder={t('닉네임', 'Nickname')} aria-label={t('닉네임', 'Nickname')} />
+      <div class="swatches" role="radiogroup" aria-label={t('쪽지 색', 'Note color')}>
         {#each colors as item (item)}
           <button
             type="button"
@@ -92,7 +99,7 @@
       </div>
       <span class="send">
         <span class="count">{length}/{MAX_TEXT}</span>
-        <button class="btn primary" disabled={guestbook.busy || !text.trim()}>붙이기</button>
+        <button class="btn primary" disabled={guestbook.busy || !text.trim()}>{t('붙이기', 'Post')}</button>
       </span>
     </div>
   </form>
@@ -107,20 +114,20 @@
               <strong>{note.name}</strong>
               <time title={note.id}>{ago(note.at)}</time>
               {#if note.pubkey === guestbook.me}
-                <button class="peel" onclick={() => remove(note)}>떼기</button>
+                <button class="peel" onclick={() => remove(note)}>{t('떼기', 'Peel off')}</button>
               {/if}
             </footer>
           </li>
         {/each}
       </ol>
     {:else if guestbook.relays}
-      <p class="empty">아직 쪽지가 없습니다. 첫 쪽지를 붙여 보세요.</p>
+      <p class="empty">{t('아직 쪽지가 없습니다. 첫 쪽지를 붙여 보세요.', 'No notes yet. Stick up the first one.')}</p>
     {/if}
   </div>
 
   <div class="statusbar" role="status">
     <span>{status}</span>
-    <span>지금 {guestbook.online}명 접속 중</span>
+    <span>{t('지금 ' + guestbook.online + '명 접속 중', guestbook.online + ' online now')}</span>
   </div>
 </div>
 

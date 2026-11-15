@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { itemCount, t } from '../os/i18n';
   import { untrack } from 'svelte';
   import {
     BUILD_TIME,
@@ -26,21 +27,21 @@
   let selected = $state<string | null>(null);
 
   const columns: ListColumn[] = [
-    { label: '이름', width: 'minmax(120px, 1fr)' },
-    { label: '수정한 날짜', width: '150px', optional: true },
-    { label: '유형', width: '120px', optional: true },
-    { label: '크기', width: '72px', align: 'end' }
+    { label: t('이름', 'Name'), width: 'minmax(120px, 1fr)' },
+    { label: t('수정한 날짜', 'Date Modified'), width: '150px', optional: true },
+    { label: t('유형', 'Type'), width: '120px', optional: true },
+    { label: t('크기', 'Size'), width: '72px', align: 'end' }
   ];
 
   const types: Record<string, string> = {
-    txt: '텍스트 문서',
-    ini: '구성 설정',
-    dll: '응용 프로그램 확장',
-    sys: '시스템 파일'
+    txt: t('텍스트 문서', 'Text Document'),
+    ini: t('구성 설정', 'Configuration Settings'),
+    dll: t('응용 프로그램 확장', 'Application Extension'),
+    sys: t('시스템 파일', 'System File')
   };
 
   function typeOf(name: string) {
-    return types[name.slice(name.lastIndexOf('.') + 1).toLowerCase()] ?? '파일';
+    return types[name.slice(name.lastIndexOf('.') + 1).toLowerCase()] ?? t('파일', 'File');
   }
 
   interface Entry extends ListRow {
@@ -60,7 +61,7 @@
       list.push({
         key: 'dir:' + name,
         icon: 'folder',
-        cells: [name, built, '파일 폴더', ''],
+        cells: [name, built, t('파일 폴더', 'File Folder'), ''],
         open: () => go(here + '/' + name)
       });
     }
@@ -92,7 +93,7 @@
 
   const rootDrive = $derived(drives.find((drive) => drive.letter + ':' === current));
   const icon = $derived<IconName>(current === '' ? 'computer' : rootDrive ? rootDrive.type : 'folder');
-  const address = $derived(current === '' ? '내 컴퓨터' : displayPath(current) + (rootDrive ? '\\' : ''));
+  const address = $derived(current === '' ? t('내 컴퓨터', 'My Computer') : displayPath(current) + (rootDrive ? '\\' : ''));
   const selectedFile = $derived(entries.find((entry) => entry.key === selected)?.fileId);
   const count = $derived(current === '' ? drives.length : entries.length);
 
@@ -127,9 +128,13 @@
     wm.dialog({
       key: 'no-disk:' + drive.letter + ':' + win.id,
       owner: win.id,
-      title: '내 컴퓨터',
+      title: t('내 컴퓨터', 'My Computer'),
       kind: 'error',
-      message: drive.letter + ':\\에 액세스할 수 없습니다.\n\n드라이브에 디스크를 넣고 다시 시도하십시오.'
+      message: drive.letter +
+        t(
+          ':\\에 액세스할 수 없습니다.\n\n드라이브에 디스크를 넣고 다시 시도하십시오.',
+          ':\\ is not accessible.\n\nPlease insert a disk into the drive and try again.'
+        )
     });
   }
 
@@ -139,7 +144,7 @@
       owner: win.id,
       title: name,
       kind: 'error',
-      message: name + '은(는) HaYeon OS가 사용 중이라 열 수 없습니다.'
+      message: name + t('은(는) HaYeon OS가 사용 중이라 열 수 없습니다.', ' is in use by HaYeon OS and can’t be opened.')
     });
   }
 
@@ -165,7 +170,7 @@
   }
 
   function newFile() {
-    const file = fs.create(fs.uniqueName('새 텍스트 문서.txt'), '');
+    const file = fs.create(fs.uniqueName(t('새 텍스트 문서.txt', 'New Text Document.txt')), '');
     selected = 'user:' + file.id;
   }
 </script>
@@ -184,9 +189,9 @@
       <span class="name">{driveTitle(drive)}</span>
       {#if drive.type === 'disk'}
         <span class="bar"><i style="width: {drive.usedPercent}%"></i></span>
-        <span class="detail">{drive.total}GB 중 {drive.free}GB 사용 가능</span>
+        <span class="detail">{t(drive.total + 'GB 중 ' + drive.free + 'GB 사용 가능', drive.free + ' GB free of ' + drive.total + ' GB')}</span>
       {:else}
-        <span class="detail">{drive.type === 'cd' ? 'CD 드라이브' : '3.5 플로피 디스크'}</span>
+        <span class="detail">{drive.type === 'cd' ? t('CD 드라이브', 'CD Drive') : t('3.5 플로피 디스크', '3½ Floppy Disk')}</span>
       {/if}
     </span>
   </button>
@@ -194,10 +199,10 @@
 
 <div class="explorer">
   <div class="toolbar">
-    <button class="tool" aria-label="뒤로" title="뒤로" disabled={trail.length === 0} onclick={back}>
+    <button class="tool" aria-label={t('뒤로', 'Back')} title={t('뒤로', 'Back')} disabled={trail.length === 0} onclick={back}>
       <Icon name="back" size={16} />
     </button>
-    <button class="tool" aria-label="위로" title="위로" disabled={current === ''} onclick={up}>
+    <button class="tool" aria-label={t('위로', 'Up')} title={t('위로', 'Up')} disabled={current === ''} onclick={up}>
       <Icon name="up" size={16} />
     </button>
     <div class="address">
@@ -208,9 +213,9 @@
 
   {#if current === DOCUMENTS}
     <div class="toolbar">
-      <button class="tool" onclick={newFile}>새 텍스트 문서</button>
+      <button class="tool" onclick={newFile}>{t('새 텍스트 문서', 'New Text Document')}</button>
       <button class="tool" disabled={selectedFile === undefined} onclick={() => selected && removeEntry(selected)}>
-        삭제
+        {t('삭제', 'Delete')}
       </button>
     </div>
   {/if}
@@ -218,13 +223,13 @@
   {#if current === ''}
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="drives" onpointerdown={pressBlank}>
-      <h3>하드 디스크 드라이브 ({disks.length})</h3>
+      <h3>{t('하드 디스크 드라이브', 'Hard Disk Drives')} ({disks.length})</h3>
       <div class="tiles">
         {#each disks as drive (drive.letter)}
           {@render tile(drive)}
         {/each}
       </div>
-      <h3>이동식 저장소가 있는 장치 ({removable.length})</h3>
+      <h3>{t('이동식 저장소가 있는 장치', 'Devices with Removable Storage')} ({removable.length})</h3>
       <div class="tiles">
         {#each removable as drive (drive.letter)}
           {@render tile(drive)}
@@ -236,13 +241,13 @@
       {columns}
       rows={entries}
       bind:selected
-      empty="이 폴더는 비어 있습니다."
+      empty={t('이 폴더는 비어 있습니다.', 'This folder is empty.')}
       onopen={openEntry}
       ondelete={removeEntry}
     />
   {/if}
 
-  <div class="statusbar"><span>{count}개 항목</span></div>
+  <div class="statusbar"><span>{itemCount(count)}</span></div>
 </div>
 
 <style>

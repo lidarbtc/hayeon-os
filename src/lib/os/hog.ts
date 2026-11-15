@@ -1,5 +1,6 @@
 // Rules of 고슴도치 찾기: minesweeper with hedgehogs. Pure functions over a flat
 // array of cells, row by row.
+import { t } from './i18n';
 
 export type LevelId = 'beginner' | 'intermediate' | 'expert';
 
@@ -12,9 +13,9 @@ export interface Level {
 }
 
 export const levels: Level[] = [
-  { id: 'beginner', label: '초급', cols: 9, rows: 9, hogs: 10 },
-  { id: 'intermediate', label: '중급', cols: 16, rows: 16, hogs: 40 },
-  { id: 'expert', label: '고급', cols: 30, rows: 16, hogs: 99 }
+  { id: 'beginner', label: t('초급', 'Beginner'), cols: 9, rows: 9, hogs: 10 },
+  { id: 'intermediate', label: t('중급', 'Intermediate'), cols: 16, rows: 16, hogs: 40 },
+  { id: 'expert', label: t('고급', 'Expert'), cols: 30, rows: 16, hogs: 99 }
 ];
 
 export interface Cell {

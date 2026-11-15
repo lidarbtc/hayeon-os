@@ -2,6 +2,7 @@
 // synth in synth.ts performs while it plays: the tripleS songs come from MIDI
 // files (public/music, made by scripts/music.py) and the three house tunes from
 // the patterns below.
+import { t } from './i18n';
 
 import remixes from './music.json';
 import { parseMidi } from './midi';
@@ -25,7 +26,7 @@ export interface Song {
 
 const house: Pattern[] = [
   {
-    title: '물방울',
+    title: t('물방울', 'Droplets'),
     bpm: 108,
     bars: [
       { bass: 36, tones: [60, 64, 67, 72] },
@@ -42,7 +43,7 @@ const house: Pattern[] = [
     loops: 12
   },
   {
-    title: '터쿼이즈 드라이브',
+    title: t('터쿼이즈 드라이브', 'Turquoise Drive'),
     bpm: 124,
     bars: [
       { bass: 33, tones: [57, 60, 64, 69] },
@@ -59,7 +60,7 @@ const house: Pattern[] = [
     loops: 14
   },
   {
-    title: '밤 언덕',
+    title: t('밤 언덕', 'Night Hill'),
     bpm: 76,
     bars: [
       { bass: 41, tones: [65, 69, 72, 76] },
@@ -78,7 +79,11 @@ const house: Pattern[] = [
 ];
 
 export const songs: Song[] = [
-  ...(remixes as Song[]),
+  // English pages name a song like "가시권 (Heart Raider)" by the part in brackets.
+  ...(remixes as Song[]).map((song) => ({
+    ...song,
+    title: t(song.title, /[가-힣]/.test(song.title) ? (/\(([^)]+)\)$/.exec(song.title)?.[1] ?? song.title) : song.title)
+  })),
   ...house.map((pattern, index) => ({
     id: 'house-' + index,
     title: pattern.title,

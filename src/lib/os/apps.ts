@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import ControlPanel from '../apps/ControlPanel.svelte';
 import Dialog from '../apps/Dialog.svelte';
 import Explorer from '../apps/Explorer.svelte';
@@ -15,7 +16,7 @@ import { registerApps } from './registry';
 registerApps([
   {
     id: 'system',
-    title: '시스템 속성',
+    title: t('시스템 속성', 'System Properties'),
     icon: 'system',
     component: SystemProperties,
     width: 420,
@@ -26,7 +27,7 @@ registerApps([
   },
   {
     id: 'notepad',
-    title: '제목 없음 - 메모장',
+    title: t('제목 없음 - 메모장', 'Untitled - Notepad'),
     icon: 'notepad',
     component: Notepad,
     width: 500,
@@ -36,7 +37,7 @@ registerApps([
   },
   {
     id: 'explorer',
-    title: '내 컴퓨터',
+    title: t('내 컴퓨터', 'My Computer'),
     icon: 'computer',
     component: Explorer,
     width: 640,
@@ -46,7 +47,7 @@ registerApps([
   },
   {
     id: 'bin',
-    title: '휴지통',
+    title: t('휴지통', 'Recycle Bin'),
     icon: 'bin',
     component: RecycleBin,
     width: 560,
@@ -57,7 +58,7 @@ registerApps([
   {
     // The game sizes its own window to the board, so these are only the first guess.
     id: 'hedgehog',
-    title: '고슴도치 찾기',
+    title: t('고슴도치 찾기', 'Hedgehog Finder'),
     icon: 'hedgehog',
     component: HedgehogFinder,
     width: 284,
@@ -68,7 +69,7 @@ registerApps([
   },
   {
     id: 'player',
-    title: '미디어 플레이어',
+    title: t('미디어 플레이어', 'Media Player'),
     icon: 'player',
     component: MediaPlayer,
     width: 392,
@@ -78,7 +79,7 @@ registerApps([
   },
   {
     id: 'terminal',
-    title: '터미널',
+    title: t('터미널', 'Terminal'),
     icon: 'terminal',
     component: Terminal,
     width: 640,
@@ -88,7 +89,7 @@ registerApps([
   },
   {
     id: 'control',
-    title: '제어판',
+    title: t('제어판', 'Control Panel'),
     icon: 'control',
     component: ControlPanel,
     width: 452,
@@ -99,7 +100,7 @@ registerApps([
   },
   {
     id: 'photos',
-    title: '사진 뷰어',
+    title: t('사진 뷰어', 'Photo Viewer'),
     icon: 'pictures',
     component: PhotoViewer,
     width: 720,
@@ -109,7 +110,7 @@ registerApps([
   },
   {
     id: 'profile',
-    title: '정하연 - 프로필',
+    title: t('정하연 - 프로필', 'Jeong HaYeon - Profile'),
     icon: 'profile',
     component: Profile,
     width: 430,
@@ -119,7 +120,7 @@ registerApps([
   },
   {
     id: 'guestbook',
-    title: '방명록',
+    title: t('방명록', 'Guestbook'),
     icon: 'guestbook',
     component: Guestbook,
     width: 560,

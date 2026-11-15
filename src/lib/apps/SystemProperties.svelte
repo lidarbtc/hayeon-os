@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from '../os/i18n';
   import { REPO_URL, TRIPLES_URL } from '../os/about';
   import { wm, type Win } from '../os/wm.svelte';
   import Icon from '../ui/Icon.svelte';
@@ -6,8 +7,8 @@
 
   let { win }: { win: Win } = $props();
 
-  const tabs = ['일반', '컴퓨터 이름', '하드웨어'] as const;
-  let tab = $state<(typeof tabs)[number]>('일반');
+  const tabs = [t('일반', 'General'), t('컴퓨터 이름', 'Computer Name'), t('하드웨어', 'Hardware')];
+  let tab = $state(tabs[0]);
 
   let width = $state(0);
   let height = $state(0);
@@ -23,7 +24,7 @@
     const total = Math.floor(ms / 1000);
     const hours = Math.floor(total / 3600);
     const minutes = Math.floor((total % 3600) / 60);
-    return (hours ? hours + '시간 ' : '') + (hours || minutes ? minutes + '분 ' : '') + (total % 60) + '초';
+    return (hours ? hours + t('시간 ', 'h ') : '') + (hours || minutes ? minutes + t('분 ', 'm ') : '') + (total % 60) + t('초', 's');
   }
 </script>
 
@@ -39,19 +40,19 @@
   </div>
 
   <div class="panel" role="tabpanel">
-    {#if tab === '일반'}
+    {#if tab === tabs[0]}
       <div class="banner">
         <Orb size={54} />
         <div class="wordmark">HaYeon<span>OS</span><sup>S19</sup></div>
       </div>
       <dl>
-        <dt>시스템</dt>
+        <dt>{t('시스템', 'System')}</dt>
         <dd>HaYeon OS S19<br />Version 19.0<br />Build 20070801</dd>
-        <dt>등록된 사용자</dt>
+        <dt>{t('등록된 사용자', 'Registered to')}</dt>
         <dd>hayeon.eth</dd>
-        <dt>테마 색</dt>
+        <dt>{t('테마 색', 'Theme color')}</dt>
         <dd><i class="swatch"></i>Medium Turquoise #52D9BB</dd>
-        <dt>만든 사람</dt>
+        <dt>{t('만든 사람', 'Made by')}</dt>
         <dd class="links">
           <a href={TRIPLES_URL} target="_blank" rel="noopener" title="triples.love" aria-label="triples.love">
             <Icon name="triples" size={22} />
@@ -61,34 +62,34 @@
           </a>
         </dd>
       </dl>
-    {:else if tab === '컴퓨터 이름'}
+    {:else if tab === tabs[1]}
       <p class="lead">
         <Icon name="computer" size={32} />
-        <span>이 컴퓨터는 아래 이름으로 찾을 수 있습니다.</span>
+        <span>{t('이 컴퓨터는 아래 이름으로 찾을 수 있습니다.', 'This computer goes by the name below.')}</span>
       </p>
       <dl>
-        <dt>컴퓨터 이름</dt>
+        <dt>{t('컴퓨터 이름', 'Computer name')}</dt>
         <dd>hayeon.eth</dd>
-        <dt>작업 그룹</dt>
+        <dt>{t('작업 그룹', 'Workgroup')}</dt>
         <dd>tripleS</dd>
-        <dt>설명</dt>
-        <dd>S19 정하연 팬의 컴퓨터</dd>
+        <dt>{t('설명', 'Description')}</dt>
+        <dd>{t('S19 정하연 팬의 컴퓨터', 'An S19 HaYeon fan’s computer')}</dd>
       </dl>
-      <p class="note">tripleS S19 정하연을 좋아하는 팬이 만든 비공식 작품입니다.</p>
+      <p class="note">{t('tripleS S19 정하연을 좋아하는 팬이 만든 비공식 작품입니다.', 'An unofficial work by a fan of tripleS S19 Jeong HaYeon.')}</p>
     {:else}
-      <h3>지금 빌려 쓰는 컴퓨터</h3>
+      <h3>{t('지금 빌려 쓰는 컴퓨터', 'The computer you’re borrowing')}</h3>
       <dl>
-        <dt>화면</dt>
+        <dt>{t('화면', 'Screen')}</dt>
         <dd>{width} × {height}</dd>
-        <dt>프로세서</dt>
-        <dd>{threads ? '스레드 ' + threads + '개' : '알 수 없음'}</dd>
-        <dt>가동 시간</dt>
+        <dt>{t('프로세서', 'Processor')}</dt>
+        <dd>{threads ? t('스레드 ' + threads + '개', threads + ' threads') : t('알 수 없음', 'Unknown')}</dd>
+        <dt>{t('가동 시간', 'Uptime')}</dt>
         <dd>{duration(uptime)}</dd>
       </dl>
     {/if}
   </div>
 
-  <footer><button class="btn primary" onclick={() => wm.close(win.id)}>확인</button></footer>
+  <footer><button class="btn primary" onclick={() => wm.close(win.id)}>{t('확인', 'OK')}</button></footer>
 </div>
 
 <style>

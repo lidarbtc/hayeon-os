@@ -1,6 +1,7 @@
 <script lang="ts">
-  const timeFormat = new Intl.DateTimeFormat('ko-KR', { hour: 'numeric', minute: '2-digit', hour12: true });
-  const fullFormat = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'full' });
+  import { locale } from '../os/i18n';
+  const timeFormat = new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit', hour12: true });
+  const fullFormat = new Intl.DateTimeFormat(locale, { dateStyle: 'full' });
 
   let now = $state(new Date());
 

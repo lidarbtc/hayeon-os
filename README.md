@@ -23,7 +23,12 @@ Unofficial fan work. Not affiliated with MODHAUS or tripleS.
 - A terminal (try `help`)
 - Control Panel: two themes, four wallpapers and a gravity switch
 
-The interface is in Korean. All icons and wallpapers are hand-drawn SVG.
+The interface speaks Korean and English. It follows the browser's language, and the welcome
+screen and Control Panel switch between the two; `?lang=en` or `?lang=ko` in the address picks
+one directly. Wording lives next to each screen as `t('한국어', 'English')` pairs (see
+`src/lib/os/i18n.ts`), and photo titles and captions have an `en` entry in `photos.json`.
+
+All icons and wallpapers are hand-drawn SVG.
 
 ## Development
 

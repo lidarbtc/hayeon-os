@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from '../os/i18n';
   import { session } from '../os/session.svelte';
   import { wm } from '../os/wm.svelte';
   import Icon from '../ui/Icon.svelte';
@@ -15,13 +16,13 @@
     class="start"
     class:open={session.startOpen}
     data-start-button
-    aria-label="시작"
+    aria-label={t('시작', 'Start')}
     aria-expanded={session.startOpen}
-    title="시작"
+    title={t('시작', 'Start')}
     onclick={() => (session.startOpen = !session.startOpen)}
   >
     <Orb size={36} />
-    <span class="start-label">시작</span>
+    <span class="start-label">{t('시작', 'Start')}</span>
   </button>
 
   <div class="tasks">
@@ -40,7 +41,7 @@
 
   <UpdateNotice />
   <Clock />
-  <button class="peek" aria-label="바탕 화면 보기" title="바탕 화면 보기" onclick={() => wm.toggleDesktop()}></button>
+  <button class="peek" aria-label={t('바탕 화면 보기', 'Show desktop')} title={t('바탕 화면 보기', 'Show desktop')} onclick={() => wm.toggleDesktop()}></button>
 </div>
 
 <style>

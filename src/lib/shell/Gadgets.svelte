@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { dayCount, t } from '../os/i18n';
   import { fade } from 'svelte/transition';
   import { guestbook } from '../os/guestbook.svelte';
   import { birthdayLabel, daysSinceDebut, daysSinceReveal, daysToBirthday } from '../os/hayeon';
@@ -44,9 +45,9 @@
   }
 </script>
 
-<aside class="gadgets" aria-label="가젯">
+<aside class="gadgets" aria-label={t('가젯', 'Gadgets')}>
   {#if shown}
-    <button class="frame" title="사진 뷰어에서 열기" onclick={open}>
+    <button class="frame" title={t('사진 뷰어에서 열기', 'Open in Photo Viewer')} onclick={open}>
       <span class="glass">
         {#key shown.id}
           <img src={thumbUrl(shown)} alt={shown.title} style:object-position={shown.focus} transition:fade={{ duration: 600 }} />
@@ -58,17 +59,17 @@
 
   <div class="dday">
     <strong>{birthdayLabel(now)}</strong>
-    <span>{daysToBirthday(now) === 0 ? '오늘은 하연 생일' : '하연 생일 · 8월 1일'}</span>
+    <span>{daysToBirthday(now) === 0 ? t('오늘은 하연 생일', 'Happy birthday, HaYeon!') : t('하연 생일 · 8월 1일', 'HaYeon’s birthday · Aug 1')}</span>
     <dl>
-      <dt>데뷔</dt>
-      <dd>{daysSinceDebut(now).toLocaleString('ko-KR')}일째</dd>
-      <dt>S19 공개</dt>
-      <dd>{daysSinceReveal(now).toLocaleString('ko-KR')}일째</dd>
+      <dt>{t('데뷔', 'Debut')}</dt>
+      <dd>{dayCount(daysSinceDebut(now))}</dd>
+      <dt>{t('S19 공개', 'S19 reveal')}</dt>
+      <dd>{dayCount(daysSinceReveal(now))}</dd>
     </dl>
   </div>
 
-  <button class="book" title="방명록 열기" onclick={() => wm.open('guestbook')}>
-    <span class="head"><b>방명록</b><i class:on={guestbook.relays > 0}></i>{guestbook.online}명 접속 중</span>
+  <button class="book" title={t('방명록 열기', 'Open Guestbook')} onclick={() => wm.open('guestbook')}>
+    <span class="head"><b>{t('방명록', 'Guestbook')}</b><i class:on={guestbook.relays > 0}></i>{t(guestbook.online + '명 접속 중', guestbook.online + ' online')}</span>
     {#if note}
       {#key note.key}
         <span class="slip {note.color}" in:fade={{ duration: 300 }}>
@@ -77,7 +78,7 @@
         </span>
       {/key}
     {:else}
-      <span class="quiet">{guestbook.relays ? '첫 쪽지를 붙여 보세요' : '연결하는 중…'}</span>
+      <span class="quiet">{guestbook.relays ? t('첫 쪽지를 붙여 보세요', 'Stick up the first note') : t('연결하는 중…', 'Connecting…')}</span>
     {/if}
   </button>
 </aside>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from '../os/i18n';
   import { untrack } from 'svelte';
   import { fade } from 'svelte/transition';
   import { photos, photoUrl, thumbUrl, viewer, type Photo } from '../os/photos.svelte';
@@ -20,7 +21,7 @@
   const albums = $derived.by(() => {
     const groups = new Map<string, { photo: Photo; index: number }[]>();
     photos.forEach((item, index) => {
-      const name = item.album || '기타';
+      const name = item.album || t('기타', 'Other');
       if (!groups.has(name)) groups.set(name, []);
       groups.get(name)!.push({ photo: item, index });
     });
@@ -39,7 +40,7 @@
   });
 
   $effect(() => {
-    const title = (photo ? photo.title + ' - ' : '') + '사진 뷰어';
+    const title = (photo ? photo.title + ' - ' : '') + t('사진 뷰어', 'Photo Viewer');
     untrack(() => wm.patch(win.id, { title }));
   });
 
@@ -73,7 +74,7 @@
   function useAsWallpaper() {
     if (!photo) return;
     settings.setPhotoWallpaper(photo.id);
-    note = '바탕 화면으로 설정했습니다.';
+    note = t('바탕 화면으로 설정했습니다.', 'Set as your wallpaper.');
   }
 
   function day(date: string) {
@@ -94,13 +95,13 @@
 
 <div class="viewer">
   <div class="toolbar bar">
-    <button class="tool" disabled={current === null} onclick={back}>모아 보기</button>
-    <button class="tool" disabled={current === null} onclick={() => step(-1)}>이전</button>
-    <button class="tool" disabled={current === null} onclick={() => step(1)}>다음</button>
+    <button class="tool" disabled={current === null} onclick={back}>{t('모아 보기', 'All Photos')}</button>
+    <button class="tool" disabled={current === null} onclick={() => step(-1)}>{t('이전', 'Previous')}</button>
+    <button class="tool" disabled={current === null} onclick={() => step(1)}>{t('다음', 'Next')}</button>
     <button class="tool" disabled={!photos.length} aria-pressed={playing} onclick={toggleSlides}>
-      {playing ? '슬라이드 쇼 멈춤' : '슬라이드 쇼'}
+      {playing ? t('슬라이드 쇼 멈춤', 'Stop Slide Show') : t('슬라이드 쇼', 'Slide Show')}
     </button>
-    <button class="tool" disabled={!photo} onclick={useAsWallpaper}>바탕 화면으로</button>
+    <button class="tool" disabled={!photo} onclick={useAsWallpaper}>{t('바탕 화면으로', 'Set as Wallpaper')}</button>
   </div>
 
   {#if photo}
@@ -108,10 +109,10 @@
       {#key photo.id}
         <img src={photoUrl(photo)} alt={photo.title} in:fade={{ duration: 220 }} />
       {/key}
-      <button class="nav prev" aria-label="이전 사진" onclick={() => step(-1)}>
+      <button class="nav prev" aria-label={t('이전 사진', 'Previous photo')} onclick={() => step(-1)}>
         <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path d="M10.5 2.5 5 8l5.5 5.5" /></svg>
       </button>
-      <button class="nav next" aria-label="다음 사진" onclick={() => step(1)}>
+      <button class="nav next" aria-label={t('다음 사진', 'Next photo')} onclick={() => step(1)}>
         <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path d="M5.5 2.5 11 8l-5.5 5.5" /></svg>
       </button>
     </div>
@@ -123,7 +124,7 @@
       {#if photo.caption}<p>{photo.caption}</p>{/if}
       {#if photo.credit}
         <p class="credit">
-          사진:
+          {t('사진:', 'Photo:')}
           {#if photo.source}
             <a href={photo.source} target="_blank" rel="noopener noreferrer">{photo.credit}</a>
           {:else}
@@ -147,11 +148,11 @@
       {/each}
     </div>
   {:else}
-    <p class="empty">아직 사진이 없습니다.</p>
+    <p class="empty">{t('아직 사진이 없습니다.', 'No photos yet.')}</p>
   {/if}
 
   <div class="statusbar" role="status">
-    <span>{note || (current === null ? '사진 ' + photos.length + '장' : current + 1 + ' / ' + photos.length)}</span>
+    <span>{note || (current === null ? t('사진 ' + photos.length + '장', photos.length + ' photos') : current + 1 + ' / ' + photos.length)}</span>
     {#if photo}<span>{photo.w} × {photo.h}</span>{/if}
   </div>
 </div>

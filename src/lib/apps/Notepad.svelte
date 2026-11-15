@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { locale, t } from '../os/i18n';
   import { untrack } from 'svelte';
   import { DOCUMENTS, displayPath, staticFile } from '../os/disk';
   import { fs } from '../os/fs.svelte';
@@ -10,7 +11,7 @@
 
   let { win, source }: { win: Win; source?: FileRef } = $props();
 
-  const UNTITLED = '제목 없음';
+  const UNTITLED = t('제목 없음', 'Untitled');
 
   // Only a file that sits in 내 문서 can be saved in place. System files and files
   // opened from the recycle bin start out unbound, so saving them asks for a new name.
@@ -39,7 +40,7 @@
   const dirty = $derived(text !== saved);
 
   $effect(() => {
-    const title = name + ' - 메모장';
+    const title = name + t(' - 메모장', ' - Notepad');
     untrack(() => wm.patch(win.id, { title }));
   });
 
@@ -81,13 +82,13 @@
     const dialogId = wm.dialog({
       key: 'save-as:' + win.id,
       owner: win.id,
-      title: '다른 이름으로 저장',
+      title: t('다른 이름으로 저장', 'Save As'),
       icon: 'notepad',
-      message: '저장 위치: ' + displayPath(DOCUMENTS),
-      input: { label: '파일 이름:', value: name === UNTITLED ? UNTITLED + '.txt' : name },
+      message: t('저장 위치: ', 'Save in: ') + displayPath(DOCUMENTS),
+      input: { label: t('파일 이름:', 'File name:'), value: name === UNTITLED ? UNTITLED + '.txt' : name },
       buttons: [
-        { label: '저장', primary: true, action: (value) => commit(value, dialogId) },
-        { label: '취소' }
+        { label: t('저장', 'Save'), primary: true, action: (value) => commit(value, dialogId) },
+        { label: t('취소', 'Cancel') }
       ]
     });
   }
@@ -99,9 +100,10 @@
       wm.dialog({
         key: 'bad-name:' + win.id,
         owner: win.id,
-        title: '다른 이름으로 저장',
+        title: t('다른 이름으로 저장', 'Save As'),
         kind: 'error',
-        message: '파일 이름에는 다음 문자를 쓸 수 없습니다.\n\\ / : * ? " < > |'
+        message: t('파일 이름에는 다음 문자를 쓸 수 없습니다.', 'A file name can’t contain any of these characters:') +
+          '\n\\ / : * ? " < > |'
       });
       return false;
     }
@@ -112,12 +114,12 @@
       wm.dialog({
         key: 'overwrite:' + win.id,
         owner: win.id,
-        title: '다른 이름으로 저장',
+        title: t('다른 이름으로 저장', 'Save As'),
         kind: 'question',
-        message: existing.name + '은(는) 이미 있습니다.\n바꾸시겠습니까?',
+        message: existing.name + t('은(는) 이미 있습니다.\n바꾸시겠습니까?', ' already exists.\nDo you want to replace it?'),
         buttons: [
           {
-            label: '예',
+            label: t('예', 'Yes'),
             action: () => {
               fs.write(existing.id, text);
               bind(existing.id, existing.name);
@@ -125,7 +127,7 @@
               finishSave();
             }
           },
-          { label: '아니요', primary: true }
+          { label: t('아니요', 'No'), primary: true }
         ]
       });
       return false;
@@ -156,13 +158,13 @@
     wm.dialog({
       key: 'discard-' + reason + ':' + win.id,
       owner: win.id,
-      title: '메모장',
+      title: t('메모장', 'Notepad'),
       kind: 'question',
-      message: '변경 내용을 ' + name + '에 저장하시겠습니까?',
+      message: t('변경 내용을 ' + name + '에 저장하시겠습니까?', 'Do you want to save changes to ' + name + '?'),
       buttons: [
-        { label: '저장', primary: true, action: () => save(then) },
-        { label: '저장 안 함', action: then },
-        { label: '취소' }
+        { label: t('저장', 'Save'), primary: true, action: () => save(then) },
+        { label: t('저장 안 함', 'Don’t Save'), action: then },
+        { label: t('취소', 'Cancel') }
       ]
     });
   }
@@ -184,7 +186,7 @@
     caret = { line: before.split('\n').length, column: before.length - before.lastIndexOf('\n') };
   }
 
-  const stampFormat = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'short', timeStyle: 'short' });
+  const stampFormat = new Intl.DateTimeFormat(locale, { dateStyle: 'short', timeStyle: 'short' });
 
   function insertTime() {
     area.focus();
@@ -208,38 +210,41 @@
 
   const menus = $derived<Menu[]>([
     {
-      label: '파일',
+      label: t('파일', 'File'),
       items: [
-        { label: '새로 만들기', action: newDocument },
-        { label: '저장', shortcut: 'Ctrl+S', action: () => save() },
-        { label: '다른 이름으로 저장...', shortcut: 'Ctrl+Shift+S', action: () => saveAs() },
+        { label: t('새로 만들기', 'New'), action: newDocument },
+        { label: t('저장', 'Save'), shortcut: 'Ctrl+S', action: () => save() },
+        { label: t('다른 이름으로 저장...', 'Save As...'), shortcut: 'Ctrl+Shift+S', action: () => saveAs() },
         { separator: true },
-        { label: '끝내기', action: () => wm.requestClose(win.id) }
+        { label: t('끝내기', 'Exit'), action: () => wm.requestClose(win.id) }
       ]
     },
     {
-      label: '편집',
+      label: t('편집', 'Edit'),
       items: [
-        { label: '모두 선택', action: selectAll },
-        { label: '시간/날짜', action: insertTime }
+        { label: t('모두 선택', 'Select All'), action: selectAll },
+        { label: t('시간/날짜', 'Time/Date'), action: insertTime }
       ]
     },
     {
-      label: '서식',
-      items: [{ label: '자동 줄 바꿈', checked: wrap, action: () => (wrap = !wrap) }]
+      label: t('서식', 'Format'),
+      items: [{ label: t('자동 줄 바꿈', 'Word Wrap'), checked: wrap, action: () => (wrap = !wrap) }]
     },
     {
-      label: '도움말',
+      label: t('도움말', 'Help'),
       items: [
         {
-          label: '메모장 정보',
+          label: t('메모장 정보', 'About Notepad'),
           action: () => {
             wm.dialog({
               key: 'about:' + win.id,
               owner: win.id,
-              title: '메모장 정보',
+              title: t('메모장 정보', 'About Notepad'),
               kind: 'info',
-              message: '메모장\nHaYeon OS S19 (Build 20070801)\n\n쓴 글은 지금 쓰는 기기에만 저장됩니다.'
+              message: t(
+                '메모장\nHaYeon OS S19 (Build 20070801)\n\n쓴 글은 지금 쓰는 기기에만 저장됩니다.',
+                'Notepad\nHaYeon OS S19 (Build 20070801)\n\nWhat you write is saved only on this device.'
+              )
             });
           }
         }
@@ -257,15 +262,15 @@
     class:nowrap={!wrap}
     wrap={wrap ? 'soft' : 'off'}
     spellcheck="false"
-    aria-label="문서 내용"
+    aria-label={t('문서 내용', 'Document')}
     oninput={updateCaret}
     onkeyup={updateCaret}
     onclick={updateCaret}
     onselect={updateCaret}
   ></textarea>
   <div class="statusbar">
-    <span>{dirty ? '수정됨' : ''}</span>
-    <span>줄 {caret.line}, 열 {caret.column}</span>
+    <span>{dirty ? t('수정됨', 'Modified') : ''}</span>
+    <span>{t('줄', 'Ln')} {caret.line}, {t('열', 'Col')} {caret.column}</span>
   </div>
 </div>
 

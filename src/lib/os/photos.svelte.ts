@@ -1,3 +1,4 @@
+import { lang } from './i18n';
 import list from './photos.json';
 import { packedUrl } from './pack.svelte';
 
@@ -21,7 +22,10 @@ export interface Photo {
   avatar?: boolean;
 }
 
-export const photos: Photo[] = list;
+// English pages use the English title, album and caption written under "en".
+export const photos: Photo[] = (list as (Photo & { en?: Partial<Photo> })[]).map(({ en, ...photo }) =>
+  lang === 'en' && en ? { ...photo, ...en } : photo
+);
 
 const base = import.meta.env.BASE_URL + 'photos/';
 

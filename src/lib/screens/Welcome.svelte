@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { lang, t } from '../os/i18n';
   import Avatar from '../ui/Avatar.svelte';
   import Icon from '../ui/Icon.svelte';
   import Orb from '../ui/Orb.svelte';
@@ -19,21 +20,25 @@
 <div class="aero-bg welcome">
   <main>
     {#if entering}
-      <div class="entering" role="status"><span class="spinner"></span>환영합니다</div>
+      <div class="entering" role="status"><span class="spinner"></span>{t('환영합니다', 'Welcome')}</div>
     {:else}
       <button class="user" onclick={enter}>
         <span class="avatar"><Avatar size={118} /></span>
         <span class="name">hayeon.eth</span>
-        <span class="hint">눌러서 시작하기</span>
+        <span class="hint">{t('눌러서 시작하기', 'Click to start')}</span>
       </button>
     {/if}
   </main>
   <footer>
-    <button class="power" aria-label="시스템 종료" title="시스템 종료" onclick={() => session.leave('shutdown')}>
+    <button class="power" aria-label={t('시스템 종료', 'Shut down')} title={t('시스템 종료', 'Shut down')} onclick={() => session.leave('shutdown')}>
       <Icon name="power" size={18} />
     </button>
     <div class="brand"><Orb size={30} /><span>HaYeon OS <b>S19</b></span></div>
-    <span class="spacer"></span>
+    <span class="spacer">
+      <button class="lang" onclick={() => session.switchLanguage(lang === 'ko' ? 'en' : 'ko')}>
+        {lang === 'ko' ? 'English' : '한국어'}
+      </button>
+    </span>
   </footer>
 </div>
 
@@ -119,6 +124,31 @@
   .spacer {
     width: 36px;
     height: 30px;
+  }
+
+  /* Sits in the spacer, growing to the left, so the brand stays centred. */
+  .spacer {
+    position: relative;
+  }
+
+  .lang {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 30px;
+    padding: 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 4px;
+    color: #fff;
+    white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.12));
+  }
+
+  .lang:hover,
+  .lang:focus-visible {
+    outline: none;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.24));
   }
 
   .power {

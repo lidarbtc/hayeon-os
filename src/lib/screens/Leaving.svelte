@@ -1,10 +1,11 @@
 <script lang="ts">
+  import { t } from '../os/i18n';
   import { session } from '../os/session.svelte';
 
   const messages = {
-    logoff: '로그오프하는 중…',
-    restart: '다시 시작하는 중…',
-    shutdown: '시스템을 종료하는 중…'
+    logoff: t('로그오프하는 중…', 'Logging off…'),
+    restart: t('다시 시작하는 중…', 'Restarting…'),
+    shutdown: t('시스템을 종료하는 중…', 'Shutting down…')
   };
 
   $effect(() => {

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from '../os/i18n';
   import type { Snippet } from 'svelte';
   import { wm, type Win } from '../os/wm.svelte';
   import Icon from '../ui/Icon.svelte';
@@ -86,14 +87,14 @@
     <span class="title">{win.title}</span>
     <div class="controls">
       {#if !win.dialog}
-        <button aria-label="최소화" title="최소화" onclick={() => wm.minimize(win.id)}>
+        <button aria-label={t('최소화', 'Minimize')} title={t('최소화', 'Minimize')} onclick={() => wm.minimize(win.id)}>
           <svg viewBox="0 0 12 10" width="12" height="10" aria-hidden="true"><rect x="2" y="6.5" width="8" height="2.2" /></svg>
         </button>
       {/if}
       {#if win.resizable && !wm.compact}
         <button
-          aria-label={win.maximized ? '이전 크기로' : '최대화'}
-          title={win.maximized ? '이전 크기로' : '최대화'}
+          aria-label={win.maximized ? t('이전 크기로', 'Restore Down') : t('최대화', 'Maximize')}
+          title={win.maximized ? t('이전 크기로', 'Restore Down') : t('최대화', 'Maximize')}
           onclick={() => wm.toggleMaximize(win.id)}
         >
           <svg viewBox="0 0 12 10" width="12" height="10" aria-hidden="true">
@@ -105,7 +106,7 @@
           </svg>
         </button>
       {/if}
-      <button class="close" aria-label="닫기" title="닫기" onclick={() => wm.requestClose(win.id)}>
+      <button class="close" aria-label={t('닫기', 'Close')} title={t('닫기', 'Close')} onclick={() => wm.requestClose(win.id)}>
         <svg viewBox="0 0 12 10" width="12" height="10" aria-hidden="true">
           <path d="M2.4 1.4l7.2 7.2M9.6 1.4L2.4 8.6" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" />
         </svg>

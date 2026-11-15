@@ -1,6 +1,7 @@
 // The guestbook. Notes are signed in the browser and kept by public Nostr
 // relays, so there is still no server of our own and nothing costs anything.
 // Every visitor gets a throwaway key that lives in localStorage.
+import { t } from './i18n';
 
 import blockList from './guestbook-blocked.json';
 import type { NostrEvent, Pool } from './nostr';
@@ -206,7 +207,7 @@ class Guestbook {
         id: event.id,
         pubkey: event.pubkey,
         slot: tag(event, 'd'),
-        name: clean(tag(event, 'name'), MAX_NAME) || '익명',
+        name: clean(tag(event, 'name'), MAX_NAME) || t('익명', 'Anonymous'),
         text,
         color: colors.includes(color) ? color : 'mint',
         at: event.created_at * 1000
@@ -218,9 +219,9 @@ class Guestbook {
   /** Returns nothing when the note is up, or a sentence saying why it is not. */
   async post(text: string, color: NoteColor): Promise<string | void> {
     const body = clean(text, MAX_TEXT);
-    if (!body) return '쪽지에 쓸 말을 적어 주세요.';
-    if (!this.#nostr || !this.#pool || !this.#secret || !this.relays) return '아직 연결되지 않았습니다. 잠시 뒤에 다시 눌러 주세요.';
-    if (Date.now() - this.#lastPost < 20_000) return '방금 붙였습니다. 조금 있다가 또 남겨 주세요.';
+    if (!body) return t('쪽지에 쓸 말을 적어 주세요.', 'Write something on your note first.');
+    if (!this.#nostr || !this.#pool || !this.#secret || !this.relays) return t('아직 연결되지 않았습니다. 잠시 뒤에 다시 눌러 주세요.', 'Not connected yet. Try again in a moment.');
+    if (Date.now() - this.#lastPost < 20_000) return t('방금 붙였습니다. 조금 있다가 또 남겨 주세요.', 'You just posted a note. Leave another one in a little while.');
     this.busy = true;
     try {
       this.name = clean(this.name, MAX_NAME);
@@ -232,7 +233,7 @@ class Guestbook {
         ['color', color]
       ];
       const event = await this.#nostr.build(this.#secret, KIND_NOTE, tags, body, POW);
-      if (!(await this.#pool.publish(event))) return '릴레이가 쪽지를 받지 않았습니다. 다시 눌러 주세요.';
+      if (!(await this.#pool.publish(event))) return t('릴레이가 쪽지를 받지 않았습니다. 다시 눌러 주세요.', 'Your note didn’t go through. Please try again.');
       this.#lastPost = Date.now();
       this.#accept(event);
     } finally {

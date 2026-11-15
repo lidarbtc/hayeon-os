@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from '../os/i18n';
   import { fade } from 'svelte/transition';
   import { update } from '../os/offline.svelte';
 
@@ -7,7 +8,7 @@
 
 {#if update.ready}
   <div class="update">
-    <button class="tray" aria-label="업데이트 준비됨" title="업데이트 준비됨" aria-expanded={open} onclick={() => (open = !open)}>
+    <button class="tray" aria-label={t('업데이트 준비됨', 'Update ready')} title={t('업데이트 준비됨', 'Update ready')} aria-expanded={open} onclick={() => (open = !open)}>
       <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
         <circle cx="8" cy="8" r="7" fill="#52d9bb" stroke="#fff" stroke-width="1.2" />
         <path d="M8 11.5v-6M5.2 8 8 5.2 10.8 8" fill="none" stroke="#04222a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
@@ -15,11 +16,11 @@
     </button>
     {#if open}
       <div class="balloon" role="status" transition:fade={{ duration: 180 }}>
-        <strong>HaYeon OS 업데이트 준비 완료</strong>
-        <p>다시 시작하면 새 버전으로 열려요.</p>
+        <strong>{t('HaYeon OS 업데이트 준비 완료', 'HaYeon OS update ready')}</strong>
+        <p>{t('다시 시작하면 새 버전으로 열려요.', 'Restart to open the new version.')}</p>
         <div class="row">
-          <button class="btn primary" onclick={() => location.reload()}>지금 다시 시작</button>
-          <button class="btn" onclick={() => (open = false)}>나중에</button>
+          <button class="btn primary" onclick={() => location.reload()}>{t('지금 다시 시작', 'Restart now')}</button>
+          <button class="btn" onclick={() => (open = false)}>{t('나중에', 'Later')}</button>
         </div>
       </div>
     {/if}

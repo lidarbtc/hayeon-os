@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from '../os/i18n';
   import Orb from '../ui/Orb.svelte';
   import { pack } from '../os/pack.svelte';
   import { session } from '../os/session.svelte';
@@ -32,7 +33,7 @@
     <Orb size={104} />
     <div class="wordmark">HaYeon<span class="os">OS</span><sup>S19</sup></div>
   </div>
-  <div class="progress" role="progressbar" aria-label="HaYeon OS를 시작하는 중">
+  <div class="progress" role="progressbar" aria-label={t('HaYeon OS를 시작하는 중', 'Starting HaYeon OS')}>
     <div class="blocks"><i></i><i></i><i></i></div>
   </div>
   <footer>

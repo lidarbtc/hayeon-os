@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from '../os/i18n';
   import { untrack } from 'svelte';
   import type { DialogButton, DialogOptions } from '../os/types';
   import { wm, type Win } from '../os/wm.svelte';
@@ -6,7 +7,7 @@
 
   let { win, options }: { win: Win; options: DialogOptions } = $props();
 
-  const buttons = $derived<DialogButton[]>(options.buttons ?? [{ label: '확인', primary: true }]);
+  const buttons = $derived<DialogButton[]>(options.buttons ?? [{ label: t('확인', 'OK'), primary: true }]);
   let value = $state(untrack(() => options.input?.value ?? ''));
   let root: HTMLElement;
 

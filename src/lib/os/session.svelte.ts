@@ -1,3 +1,4 @@
+import { reopenIn, type Lang } from './i18n';
 import { wm } from './wm.svelte';
 
 export type Phase = 'boot' | 'welcome' | 'desktop' | 'leaving' | 'off';
@@ -26,8 +27,18 @@ class Session {
     this.phase = 'leaving';
   }
 
+  /** Restarts into the other language. Like any restart, unsaved work asks first. */
+  switchLanguage(next: Lang) {
+    this.#language = next;
+    this.leave('restart');
+    if (this.phase !== 'leaving') this.#language = null;
+  }
+
+  #language: Lang | null = null;
+
   finishLeave() {
     if (this.phase !== 'leaving') return;
+    if (this.#language && this.leaveMode === 'restart') return reopenIn(this.#language);
     wm.reset();
     this.phase = this.leaveMode === 'logoff' ? 'welcome' : this.leaveMode === 'restart' ? 'boot' : 'off';
   }

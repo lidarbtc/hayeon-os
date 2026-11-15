@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import { DOCUMENTS, README } from './disk';
 import { fs } from './fs.svelte';
 import type { FileRef, IconName } from './types';
@@ -35,11 +36,11 @@ export interface Shortcut {
 }
 
 export const shortcuts = {
-  computer: { id: 'computer', label: '내 컴퓨터', icon: 'computer', open: () => openFolder('') },
-  documents: { id: 'documents', label: '내 문서', icon: 'folder', open: () => openFolder(DOCUMENTS) },
+  computer: { id: 'computer', label: t('내 컴퓨터', 'My Computer'), icon: 'computer', open: () => openFolder('') },
+  documents: { id: 'documents', label: t('내 문서', 'My Documents'), icon: 'folder', open: () => openFolder(DOCUMENTS) },
   photos: {
     id: 'photos',
-    label: '내 사진',
+    label: t('내 사진', 'My Pictures'),
     icon: 'pictures',
     open: () => {
       wm.open('photos');
@@ -47,7 +48,7 @@ export const shortcuts = {
   },
   profile: {
     id: 'profile',
-    label: '프로필',
+    label: t('프로필', 'Profile'),
     icon: 'profile',
     open: () => {
       wm.open('profile');
@@ -55,7 +56,7 @@ export const shortcuts = {
   },
   guestbook: {
     id: 'guestbook',
-    label: '방명록',
+    label: t('방명록', 'Guestbook'),
     icon: 'guestbook',
     open: () => {
       wm.open('guestbook');
@@ -63,7 +64,7 @@ export const shortcuts = {
   },
   bin: {
     id: 'bin',
-    label: '휴지통',
+    label: t('휴지통', 'Recycle Bin'),
     // Read inside templates, so the desktop icon follows the bin as it fills and empties.
     get icon(): IconName {
       return fs.trash.length ? 'bin-full' : 'bin';
@@ -74,7 +75,7 @@ export const shortcuts = {
   },
   notepad: {
     id: 'notepad',
-    label: '메모장',
+    label: t('메모장', 'Notepad'),
     icon: 'notepad',
     open: () => {
       wm.open('notepad', { key: newNoteKey() });
@@ -82,13 +83,13 @@ export const shortcuts = {
   },
   readme: {
     id: 'readme',
-    label: '읽어보기.txt',
+    label: t('읽어보기.txt', 'Readme.txt'),
     icon: 'text',
     open: () => openTextFile({ kind: 'static', path: README })
   },
   system: {
     id: 'system',
-    label: '시스템 속성',
+    label: t('시스템 속성', 'System Properties'),
     icon: 'system',
     open: () => {
       wm.open('system');
@@ -96,7 +97,7 @@ export const shortcuts = {
   },
   hedgehog: {
     id: 'hedgehog',
-    label: '고슴도치 찾기',
+    label: t('고슴도치 찾기', 'Hedgehog Finder'),
     icon: 'hedgehog',
     open: () => {
       wm.open('hedgehog');
@@ -104,7 +105,7 @@ export const shortcuts = {
   },
   player: {
     id: 'player',
-    label: '미디어 플레이어',
+    label: t('미디어 플레이어', 'Media Player'),
     icon: 'player',
     open: () => {
       wm.open('player');
@@ -112,7 +113,7 @@ export const shortcuts = {
   },
   terminal: {
     id: 'terminal',
-    label: '터미널',
+    label: t('터미널', 'Terminal'),
     icon: 'terminal',
     open: () => {
       wm.open('terminal');
@@ -120,7 +121,7 @@ export const shortcuts = {
   },
   control: {
     id: 'control',
-    label: '제어판',
+    label: t('제어판', 'Control Panel'),
     icon: 'control',
     open: () => {
       wm.open('control');

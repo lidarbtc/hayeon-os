@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { dayCount, t } from '../os/i18n';
   import { birthdayLabel, daysSinceDebut, profile, timeline } from '../os/hayeon';
   import { avatar, photoUrl } from '../os/photos.svelte';
   import { shortcuts } from '../os/shell';
@@ -11,17 +12,17 @@
   <header>
     <div class="portrait">
       {#if avatar}
-        <img src={photoUrl(avatar)} alt="정하연" style:object-position={avatar.focus} />
+        <img src={photoUrl(avatar)} alt={t('정하연', 'Jeong HaYeon')} style:object-position={avatar.focus} />
       {:else}
         <Icon name="hedgehog" size={84} />
       {/if}
     </div>
     <div class="who">
-      <h2>정하연</h2>
-      <p class="latin">Jeong HaYeon</p>
+      <h2>{t('정하연', 'Jeong HaYeon')}</h2>
+      <p class="latin">{t('Jeong HaYeon', '정하연')}</p>
       <p class="tags"><b>S19</b><span><i></i>Medium Turquoise</span></p>
-      <p class="count">생일 {birthdayLabel(now)} · 데뷔 {daysSinceDebut(now).toLocaleString('ko-KR')}일째</p>
-      <button class="btn" onclick={() => shortcuts.photos.open()}>사진 보기</button>
+      <p class="count">{t('생일', 'Birthday')} {birthdayLabel(now)} · {t('데뷔', 'Debut')} {dayCount(daysSinceDebut(now))}</p>
+      <button class="btn" onclick={() => shortcuts.photos.open()}>{t('사진 보기', 'View Photos')}</button>
     </div>
   </header>
 
@@ -32,14 +33,14 @@
     {/each}
   </dl>
 
-  <h3>기록</h3>
+  <h3>{t('기록', 'Timeline')}</h3>
   <ol>
     {#each timeline as entry (entry.date)}
       <li><time>{entry.date}</time><span>{entry.text}</span></li>
     {/each}
   </ol>
 
-  <p class="note">팬이 모아 적은 내용이라 틀린 곳이 있을 수 있습니다.</p>
+  <p class="note">{t('팬이 모아 적은 내용이라 틀린 곳이 있을 수 있습니다.', 'Collected by fans, so some of it may be wrong.')}</p>
 </div>
 
 <style>
@@ -159,7 +160,7 @@
 
   dl {
     display: grid;
-    grid-template-columns: 84px 1fr;
+    grid-template-columns: minmax(84px, max-content) 1fr;
     gap: 5px 10px;
     margin: 16px 2px 0;
   }

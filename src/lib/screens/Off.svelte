@@ -1,13 +1,14 @@
 <script lang="ts">
+  import { t } from '../os/i18n';
   import Icon from '../ui/Icon.svelte';
   import { session } from '../os/session.svelte';
 </script>
 
 <div class="off">
-  <p>이제 탭을 닫아도 안전합니다.</p>
+  <p>{t('이제 탭을 닫아도 안전합니다.', 'It’s now safe to close this tab.')}</p>
   <button onclick={() => session.powerOn()}>
     <Icon name="power" size={18} />
-    <span>전원 켜기</span>
+    <span>{t('전원 켜기', 'Power On')}</span>
   </button>
 </div>
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from '../os/i18n';
   import { REPO_URL, TRIPLES_URL } from '../os/about';
   import { session, type LeaveMode } from '../os/session.svelte';
   import { shortcuts, type Shortcut } from '../os/shell';
@@ -42,7 +43,7 @@
 
 <svelte:window onpointerdown={closeOnOutside} onkeydown={closeOnEscape} />
 
-<div class="start-menu" bind:this={menu} role="menu" aria-label="시작 메뉴">
+<div class="start-menu" bind:this={menu} role="menu" aria-label={t('시작 메뉴', 'Start menu')}>
   <div class="programs">
     {#each programs as program (program.id)}
       <button role="menuitem" onclick={() => launch(program)}>
@@ -56,7 +57,7 @@
     <div class="avatar"><Avatar size={60} /></div>
     <div class="who">
       <strong>hayeon.eth</strong>
-      <span>S19 · 정하연</span>
+      <span>{t('S19 · 정하연', 'S19 · Jeong HaYeon')}</span>
     </div>
     <hr />
     {#each places as place (place.id)}
@@ -73,10 +74,10 @@
         <Icon name="github" size={18} />
       </a>
     </div>
-    <button role="menuitem" onclick={() => leave('logoff')}><Icon name="logoff" size={15} />로그오프</button>
-    <button role="menuitem" onclick={() => leave('restart')}><Icon name="restart" size={15} />다시 시작</button>
+    <button role="menuitem" onclick={() => leave('logoff')}><Icon name="logoff" size={15} />{t('로그오프', 'Log Off')}</button>
+    <button role="menuitem" onclick={() => leave('restart')}><Icon name="restart" size={15} />{t('다시 시작', 'Restart')}</button>
     <button role="menuitem" class="shutdown" onclick={() => leave('shutdown')}>
-      <Icon name="power" size={15} />종료
+      <Icon name="power" size={15} />{t('종료', 'Shut Down')}
     </button>
   </div>
 </div>

@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { lang, t, type Lang } from '../os/i18n';
   import { photoById, photos, thumbUrl } from '../os/photos.svelte';
+  import { session } from '../os/session.svelte';
   import { settings, type Scene, type Theme } from '../os/settings.svelte';
   import { wm, type Win } from '../os/wm.svelte';
   import Wallpaper from '../ui/Wallpaper.svelte';
@@ -7,14 +9,19 @@
   let { win }: { win: Win } = $props();
 
   const themes: { id: Theme; label: string; note: string }[] = [
-    { id: 'aero', label: '에어로', note: '유리처럼 비치는 창' },
-    { id: 'luna', label: '루나', note: '또렷한 색의 창' }
+    { id: 'aero', label: t('에어로', 'Aero'), note: t('유리처럼 비치는 창', 'Windows of see-through glass') },
+    { id: 'luna', label: t('루나', 'Luna'), note: t('또렷한 색의 창', 'Windows in solid colors') }
+  ];
+
+  const languages: { id: Lang; label: string }[] = [
+    { id: 'ko', label: '한국어' },
+    { id: 'en', label: 'English' }
   ];
 
   const wallpapers: { id: Scene; label: string }[] = [
-    { id: 'hill', label: '언덕' },
-    { id: 'night', label: '밤 언덕' },
-    { id: 'aqua', label: '물결' }
+    { id: 'hill', label: t('언덕', 'Hill') },
+    { id: 'night', label: t('밤 언덕', 'Night Hill') },
+    { id: 'aqua', label: t('물결', 'Waves') }
   ];
 
   // The picture last chosen in the viewer, or the first one until then.
@@ -24,16 +31,32 @@
     wm.dialog({
       key: 'monday:' + win.id,
       owner: win.id,
-      title: '월요일',
+      title: t('월요일', 'Monday'),
       kind: 'error',
-      message: '월요일을 끌 수 없습니다.\n\n관리자 권한이 필요하지만 이 컴퓨터에는 관리자가 없습니다.'
+      message: t('월요일을 끌 수 없습니다.\n\n관리자 권한이 필요하지만 이 컴퓨터에는 관리자가 없습니다.', 'Monday can’t be turned off.\n\nThat takes an administrator, and this computer has none.')
     });
   }
 </script>
 
 <div class="control">
   <section>
-    <h3>테마</h3>
+    <!-- Both names, so someone stuck in a language they cannot read still finds it. -->
+    <h3>언어 · Language</h3>
+    <div class="langs">
+      {#each languages as item (item.id)}
+        <button
+          class="btn"
+          class:current={lang === item.id}
+          aria-pressed={lang === item.id}
+          onclick={() => lang !== item.id && session.switchLanguage(item.id)}>{item.label}</button
+        >
+      {/each}
+    </div>
+    <small class="hint">{t('바꾸면 HaYeon OS가 다시 시작됩니다.', 'HaYeon OS restarts to switch.')}</small>
+  </section>
+
+  <section>
+    <h3>{t('테마', 'Theme')}</h3>
     <div class="choices">
       {#each themes as theme (theme.id)}
         <button
@@ -51,7 +74,7 @@
   </section>
 
   <section>
-    <h3>배경 화면</h3>
+    <h3>{t('배경 화면', 'Desktop Background')}</h3>
     <div class="choices">
       {#each wallpapers as paper (paper.id)}
         <button
@@ -72,26 +95,26 @@
           onclick={() => settings.setPhotoWallpaper(picture.id)}
         >
           <span class="preview"><img src={thumbUrl(picture)} alt="" style:object-position={picture.focus} /></span>
-          <strong>사진</strong>
+          <strong>{t('사진', 'Photo')}</strong>
         </button>
       {/if}
     </div>
     {#if picture}
-      <small class="hint">다른 사진은 내 사진에서 열고 “바탕 화면으로”를 누르면 됩니다.</small>
+      <small class="hint">{t('다른 사진은 내 사진에서 열고 “바탕 화면으로”를 누르면 됩니다.', 'For another photo, open it in My Pictures and press “Set as Wallpaper”.')}</small>
     {/if}
   </section>
 
   <section>
-    <h3>가젯</h3>
+    <h3>{t('가젯', 'Gadgets')}</h3>
     <div class="row">
       <div>
-        <strong>바탕 화면 가젯</strong>
-        <small>사진 액자와 D-day를 오른쪽에 둡니다.</small>
+        <strong>{t('바탕 화면 가젯', 'Desktop gadgets')}</strong>
+        <small>{t('사진 액자와 D-day를 오른쪽에 둡니다.', 'Shows a photo frame and the D-day on the right.')}</small>
       </div>
       <button
         class="switch"
         role="switch"
-        aria-label="가젯"
+        aria-label={t('가젯', 'Gadgets')}
         aria-checked={settings.gadgets}
         onclick={() => settings.setGadgets(!settings.gadgets)}><i></i></button
       >
@@ -99,26 +122,26 @@
   </section>
 
   <section>
-    <h3>실험실</h3>
+    <h3>{t('실험실', 'Labs')}</h3>
     <div class="row">
       <div>
-        <strong>중력</strong>
-        <small>켜면 창이 바닥으로 떨어집니다.</small>
+        <strong>{t('중력', 'Gravity')}</strong>
+        <small>{t('켜면 창이 바닥으로 떨어집니다.', 'When on, windows fall to the bottom.')}</small>
       </div>
       <button
         class="switch"
         role="switch"
-        aria-label="중력"
+        aria-label={t('중력', 'Gravity')}
         aria-checked={settings.gravity}
         onclick={() => (settings.gravity = !settings.gravity)}><i></i></button
       >
     </div>
     <div class="row">
       <div>
-        <strong>월요일</strong>
-        <small>끄기를 시도해 볼 수 있습니다.</small>
+        <strong>{t('월요일', 'Monday')}</strong>
+        <small>{t('끄기를 시도해 볼 수 있습니다.', 'You can try turning it off.')}</small>
       </div>
-      <button class="switch" role="switch" aria-label="월요일" aria-checked="true" onclick={monday}><i></i></button>
+      <button class="switch" role="switch" aria-label={t('월요일', 'Monday')} aria-checked="true" onclick={monday}><i></i></button>
     </div>
   </section>
 </div>
@@ -205,6 +228,18 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  .langs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .langs .current {
+    border-color: var(--hy-turquoise);
+    font-weight: 600;
+    box-shadow: inset 0 0 0 1px var(--hy-turquoise);
   }
 
   .hint {
