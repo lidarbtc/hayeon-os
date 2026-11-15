@@ -7,6 +7,6 @@ export const ARCHIVE_URL = 'https://hayeonarchive.com';
 /** Tags a link that leaves the site, so the other side can tell where the visit came from. */
 export function outbound(url: string) {
   const tagged = new URL(url);
-  tagged.searchParams.set('utm_source', 'hayeon-os');
+  tagged.searchParams.set('utm_source', 'hayeon.eth.link');
   return tagged.href;
 }

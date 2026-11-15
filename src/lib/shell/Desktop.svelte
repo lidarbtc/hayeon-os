@@ -139,11 +139,14 @@
   .icons {
     position: absolute;
     inset: 0;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    gap: 6px;
+    /* A fixed grid, as on Windows: a two-line name must not push its column out of line. */
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(auto-fill, 92px);
+    grid-auto-columns: 88px;
+    align-content: start;
+    justify-content: start;
+    gap: 2px 6px;
     padding: 10px 8px;
   }
 
@@ -153,7 +156,8 @@
     align-items: center;
     gap: 4px;
     width: 88px;
-    padding: 6px 4px 5px;
+    align-self: start;
+    padding: 4px 4px 3px;
     border: 1px solid transparent;
     border-radius: 4px;
     background: none;
