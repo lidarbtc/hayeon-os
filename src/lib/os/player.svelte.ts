@@ -132,8 +132,17 @@ class Player {
   #ensure() {
     if (this.#ctx) return this.#ctx;
     if (typeof AudioContext === 'undefined') return null;
+    // iPhones treat page audio like a game sound and mute it with the silent switch.
+    // Declaring it as playback makes it behave like music instead (Safari 16.4+).
+    const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+    if (session) session.type = 'playback';
     this.#ctx = new AudioContext();
     this.#rack = new Rack(this.#ctx, this.volume);
+    // iOS interrupts the audio when the page goes to the background or a call comes in,
+    // and leaves it that way when the page comes back.
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && this.playing) void this.#ctx?.resume();
+    });
     return this.#ctx;
   }
 
