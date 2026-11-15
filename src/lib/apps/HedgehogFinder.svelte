@@ -283,6 +283,7 @@
     min-height: 0;
     display: grid;
     overflow: auto;
+    container-type: inline-size;
   }
 
   .table {
@@ -298,6 +299,11 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    /* When the board is wider than the window, the counters stay in view while the board scrolls under them. */
+    position: sticky;
+    left: 10px;
+    align-self: flex-start;
+    width: min(100%, 100cqw - 20px);
     padding: 5px 7px;
     border: 2px solid;
     border-color: #9db9b8 #fff #fff #9db9b8;

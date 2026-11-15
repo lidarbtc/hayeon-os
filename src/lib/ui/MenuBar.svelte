@@ -82,6 +82,17 @@
     background: linear-gradient(180deg, #f3fffb, #c9f5ea);
   }
 
+  @media (pointer: coarse) {
+    .menu > button {
+      padding: 6px 11px;
+    }
+
+    .dropdown button {
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+  }
+
   .dropdown {
     position: absolute;
     left: 0;

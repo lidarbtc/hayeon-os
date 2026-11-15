@@ -214,8 +214,15 @@
   }
 
   @media (max-width: 639px) {
+    .tasks {
+      overflow: hidden;
+    }
+
     .task {
       flex: 0 1 44px;
+      /* Icons only: with many windows open they squeeze together and stay clear of the clock. */
+      min-width: 0;
+      padding: 0;
       justify-content: center;
     }
 

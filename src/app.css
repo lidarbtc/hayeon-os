@@ -173,6 +173,13 @@ textarea {
   white-space: nowrap;
 }
 
+/* Fingers need more to aim at than a mouse pointer does. */
+@media (pointer: coarse) {
+  .tool {
+    height: 32px;
+  }
+}
+
 .tool:hover:not(:disabled),
 .tool:focus-visible {
   outline: none;

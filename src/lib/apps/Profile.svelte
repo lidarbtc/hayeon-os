@@ -70,8 +70,11 @@
     flex: none;
     display: grid;
     place-items: center;
+    /* Fixed tracks: an auto row would grow to the photo's own height and let it hang out of the frame. */
+    grid-template: 100% / 100%;
     width: 110px;
     height: 132px;
+    overflow: hidden;
     border-radius: 6px;
     background: linear-gradient(160deg, #d6fff5, #6fe0c8 60%, #25b6b6);
     box-shadow:

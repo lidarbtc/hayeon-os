@@ -335,8 +335,13 @@
   }
 
   @media (max-width: 639px) {
-    /* Anything smaller makes iOS zoom the page in when the field gets focus. */
     .terminal {
+      /* Small enough that the help table and file listings fit a phone without wrapping. */
+      font-size: 12px;
+    }
+
+    /* Anything smaller makes iOS zoom the page in when the field gets focus. */
+    .entry {
       font-size: 16px;
     }
   }

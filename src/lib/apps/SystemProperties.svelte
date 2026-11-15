@@ -132,6 +132,17 @@
     background: #fff;
   }
 
+  @media (pointer: coarse) {
+    .tabs button {
+      padding-top: 6px;
+      padding-bottom: 7px;
+    }
+
+    .tabs button.current {
+      padding-bottom: 9px;
+    }
+  }
+
   .panel {
     flex: 1;
     min-height: 0;

@@ -246,6 +246,18 @@
     filter: drop-shadow(0 0 1px rgba(4, 34, 42, 0.95)) drop-shadow(0 0 1px rgba(4, 34, 42, 0.7));
   }
 
+  /* Fingers need more to aim at than a mouse pointer does. */
+  @media (pointer: coarse) {
+    .controls button {
+      width: 38px;
+      height: 27px;
+    }
+
+    .controls .close {
+      width: 50px;
+    }
+  }
+
   .body {
     position: relative;
     flex: 1;

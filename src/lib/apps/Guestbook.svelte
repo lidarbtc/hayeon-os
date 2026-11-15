@@ -90,8 +90,10 @@
           ></button>
         {/each}
       </div>
-      <span class="count">{length}/{MAX_TEXT}</span>
-      <button class="btn primary" disabled={guestbook.busy || !text.trim()}>붙이기</button>
+      <span class="send">
+        <span class="count">{length}/{MAX_TEXT}</span>
+        <button class="btn primary" disabled={guestbook.busy || !text.trim()}>붙이기</button>
+      </span>
     </div>
   </form>
 
@@ -194,6 +196,13 @@
     background: var(--paper);
   }
 
+  @media (pointer: coarse) {
+    .swatch {
+      width: 28px;
+      height: 28px;
+    }
+  }
+
   .swatch[aria-checked='true'] {
     box-shadow:
       0 0 0 2px #fff,
@@ -205,8 +214,15 @@
     outline-offset: 2px;
   }
 
-  .count {
+  /* Kept together so they move to the next line as a pair on narrow screens. */
+  .send {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin-left: auto;
+  }
+
+  .count {
     font-size: 12px;
     color: #5c7f88;
     font-variant-numeric: tabular-nums;

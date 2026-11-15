@@ -89,6 +89,8 @@
     z-index: 2;
     display: grid;
     grid-template-columns: minmax(0, 1fr) 148px;
+    /* The list row gives way first, so the power buttons stay on screen when the screen is short. */
+    grid-template-rows: minmax(0, 1fr) auto;
     gap: 7px;
     width: min(420px, calc(100% - 8px));
     max-height: calc(100% - var(--taskbar-h) - 8px);
@@ -112,7 +114,7 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    min-height: 268px;
+    min-height: 0;
     padding: 6px;
     border: 1px solid rgba(3, 34, 42, 0.75);
     border-radius: 4px;
@@ -123,6 +125,7 @@
 
   .programs button {
     display: flex;
+    flex: none;
     align-items: center;
     gap: 9px;
     width: 100%;
@@ -144,11 +147,14 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
+    min-height: 0;
     padding: 4px 0;
+    overflow-y: auto;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
   }
 
   .avatar {
+    flex: none;
     align-self: center;
     display: grid;
     place-items: center;

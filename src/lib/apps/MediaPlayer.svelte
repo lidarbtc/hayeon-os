@@ -188,6 +188,7 @@
     flex-direction: column;
     height: 100%;
     background: #e9f1f1;
+    container-type: size;
   }
 
   .display {
@@ -206,6 +207,13 @@
     display: block;
     width: 100%;
     height: 124px;
+  }
+
+  /* In a short window the bars shrink so the song list keeps a few rows. */
+  @container (max-height: 400px) {
+    canvas {
+      height: 56px;
+    }
   }
 
   .seek {
