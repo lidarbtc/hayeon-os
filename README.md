@@ -1,6 +1,6 @@
 # HaYeon OS
 
-A small fan-made operating system that lives at [hayeon.eth](https://hayeon.eth.limo).
+A small fan-made operating system that lives at [hayeon.eth](https://hayeon.eth.link).
 
 It is a single static page that boots into a Windows XP / 7 style desktop, painted in
 Medium Turquoise (`#52D9BB`), the colour of tripleS S19 Jeong HaYeon. It is a static site with
