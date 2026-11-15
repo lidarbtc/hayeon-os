@@ -1,7 +1,7 @@
 {
   "name": "HaYeon OS",
   "short_name": "HaYeon OS",
-  "description": "tripleS 정하연 팬이 만든 작은 운영체제. A little operating system made by a fan of tripleS HaYeon.",
+  "description": "tripleS 정하연의 작은 컴퓨터. HaYeon’s little computer.",
   "lang": "ko",
   "start_url": "./",
   "scope": "./",

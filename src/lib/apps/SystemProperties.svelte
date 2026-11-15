@@ -73,9 +73,9 @@
         <dt>{t('작업 그룹', 'Workgroup')}</dt>
         <dd>tripleS</dd>
         <dt>{t('설명', 'Description')}</dt>
-        <dd>{t('S19 정하연 팬의 컴퓨터', 'An S19 HaYeon fan’s computer')}</dd>
+        <dd>{t('하연이 컴퓨터', 'HaYeon’s computer')}</dd>
       </dl>
-      <p class="note">{t('tripleS S19 정하연을 좋아하는 팬이 만든 비공식 작품입니다.', 'An unofficial work by a fan of tripleS S19 Jeong HaYeon.')}</p>
+      <p class="note">{t('비공식 팬 사이트입니다.', 'Unofficial fan site.')}</p>
     {:else}
       <h3>{t('지금 빌려 쓰는 컴퓨터', 'The computer you’re borrowing')}</h3>
       <dl>

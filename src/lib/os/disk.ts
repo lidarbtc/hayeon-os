@@ -42,7 +42,6 @@ export interface StaticFolder {
 const readmeKo = [
   'HaYeon OS S19에 오신 것을 환영합니다.',
   '',
-  '정하연을 좋아하는 팬이 만든 작은 컴퓨터입니다.',
   '아이콘을 두 번 누르면 열립니다. 천천히 둘러보세요.',
   '',
   '[지금 할 수 있는 것]',
@@ -67,7 +66,6 @@ const readmeKo = [
 const readmeEn = [
   'Welcome to HaYeon OS S19.',
   '',
-  'A little computer made by a fan of Jeong HaYeon.',
   'Double-click an icon to open it. Take your time and look around.',
   '',
   '[Things to try]',

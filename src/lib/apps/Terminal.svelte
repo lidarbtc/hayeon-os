@@ -20,7 +20,6 @@
 
   let lines = $state<Line[]>([
     { text: VERSION },
-    { text: t('정하연을 좋아하는 팬이 만든 컴퓨터.', 'A computer made by a fan of Jeong HaYeon.') },
     { text: '' },
     { text: t('help 를 입력하면 명령어 목록이 나옵니다.', 'Type help for a list of commands.') },
     { text: '' }
