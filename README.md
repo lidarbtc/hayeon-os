@@ -84,14 +84,18 @@ subfolder. hayeon.eth is rebuilt and published automatically on every push to `m
 (`npm run build`, output `dist`, Node 20+).
 
 The site is reached through the eth.limo and eth.link gateways, where every request costs
-about a second and a file is much slower the first time a gateway is asked for it. Three
+about a second and a file is much slower the first time a gateway is asked for it. Four
 things keep that from showing:
 
 - The build is a single `index.html` with the script and styles folded in (see
   `vite.config.ts`), so the desktop needs one request.
-- A service worker (`public/sw.js`) keeps a copy of the page and the photos on the visitor's
-  device. Return visits open from that copy and fetch the newest build in the background; a
-  balloon in the taskbar offers a restart when one has arrived.
+- The build also writes `pack.bin`, every photo and song in one file. The page fetches it
+  while the boot screen shows (`src/lib/os/pack.svelte.ts`) and uses each file as it
+  arrives, so opening a photo or a song later asks the gateway for nothing.
+- A service worker (`public/sw.js`) keeps a copy of the page on the visitor's device, and
+  the page keeps the pack next to it. Return visits open from those copies and fetch the
+  newest build in the background; a balloon in the taskbar offers a restart when one has
+  arrived.
 - `.github/workflows/warm.yml` requests every file through both gateways after each push and
   every six hours.
 

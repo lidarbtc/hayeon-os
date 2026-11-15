@@ -53,7 +53,9 @@ async function page(event) {
   return (await fresh) ?? fetch(event.request);
 }
 
-// Photo and music addresses carry a content hash, so a saved copy never goes stale.
+// The page fetches photos and music in one file, pack.bin, and saves that in this
+// cache itself. These single files are only asked for while the pack is on its way.
+// Their addresses carry a content hash, so a saved copy never goes stale.
 async function kept(event) {
   const cache = await caches.open(CACHE);
   const saved = await cache.match(event.request.url);
@@ -61,24 +63,6 @@ async function kept(event) {
   const response = await fetch(event.request);
   if (response.ok) event.waitUntil(cache.put(event.request.url, response.clone()).catch(() => {}));
   return response;
-}
-
-/** Saves the listed photos one at a time and forgets the ones no longer listed. */
-async function keepPhotos(urls) {
-  const cache = await caches.open(CACHE);
-  const wanted = new Set(urls);
-  for (const request of await cache.keys()) {
-    if (request.url.startsWith(scope + 'photos/') && !wanted.has(request.url)) await cache.delete(request);
-  }
-  for (const url of wanted) {
-    if (!url.startsWith(scope + 'photos/') || (await cache.match(url))) continue;
-    try {
-      const response = await fetch(url);
-      if (response.ok) await cache.put(url, response);
-    } catch {
-      return;
-    }
-  }
 }
 
 self.addEventListener('install', (event) => {
@@ -109,9 +93,6 @@ self.addEventListener('fetch', (event) => {
 });
 
 self.addEventListener('message', (event) => {
-  if (event.data?.type === 'hayeon-os:photos' && Array.isArray(event.data.urls)) {
-    event.waitUntil(keepPhotos(event.data.urls));
-  }
   // A page tells which build it is running and hears back if a newer one is saved.
   // The announcement after a refresh can reach a page before it is listening.
   if (event.data?.type === 'hayeon-os:build') {

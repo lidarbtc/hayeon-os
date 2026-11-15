@@ -1,11 +1,25 @@
 <script lang="ts">
   import Orb from '../ui/Orb.svelte';
+  import { pack } from '../os/pack.svelte';
   import { session } from '../os/session.svelte';
+
+  // The animation always gets its time. After that the boot waits for the first
+  // files of the pack, but not for long: the desktop also works without them.
+  let shown = $state(false);
+  let waited = $state(false);
 
   $effect(() => {
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const timer = setTimeout(() => session.finishBoot(), reduce ? 1400 : 3600);
-    return () => clearTimeout(timer);
+    const show = setTimeout(() => (shown = true), reduce ? 1400 : 3600);
+    const wait = setTimeout(() => (waited = true), 8000);
+    return () => {
+      clearTimeout(show);
+      clearTimeout(wait);
+    };
+  });
+
+  $effect(() => {
+    if (shown && (pack.early || waited)) session.finishBoot();
   });
 </script>
 

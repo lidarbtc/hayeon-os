@@ -1,4 +1,5 @@
 import list from './photos.json';
+import { packedUrl } from './pack.svelte';
 
 export interface Photo {
   /** Also the file name: public/photos/<id>.webp and public/photos/thumb/<id>.webp. */
@@ -29,12 +30,13 @@ function rev(photo: Photo) {
   return '.webp?v=' + (__PHOTO_REVS__[photo.id] ?? '0');
 }
 
+// Both prefer the copy from pack.bin and ask the gateway only while that has not arrived.
 export function photoUrl(photo: Photo) {
-  return base + photo.id + rev(photo);
+  return packedUrl('photos/' + photo.id + '.webp') ?? base + photo.id + rev(photo);
 }
 
 export function thumbUrl(photo: Photo) {
-  return base + 'thumb/' + photo.id + rev(photo);
+  return packedUrl('photos/thumb/' + photo.id + '.webp') ?? base + 'thumb/' + photo.id + rev(photo);
 }
 
 export function photoById(id: string | null) {

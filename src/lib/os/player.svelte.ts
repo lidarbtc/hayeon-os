@@ -5,6 +5,7 @@
 
 import remixes from './music.json';
 import { parseMidi } from './midi';
+import { packedBytes } from './pack.svelte';
 import { fromMidi, fromPattern, type Pattern, type Score } from './score';
 import { Rack } from './synth';
 
@@ -136,12 +137,13 @@ class Player {
     if (!score) {
       score = song.pattern
         ? Promise.resolve(fromPattern(song.pattern))
-        : fetch(import.meta.env.BASE_URL + 'music/' + song.id + '.mid?v=' + song.rev)
-            .then((response) => {
+        : (
+            packedBytes('music/' + song.id + '.mid') ??
+            fetch(import.meta.env.BASE_URL + 'music/' + song.id + '.mid?v=' + song.rev).then((response) => {
               if (!response.ok) throw new Error('HTTP ' + response.status);
               return response.arrayBuffer();
             })
-            .then((buffer) => fromMidi(parseMidi(buffer)));
+          ).then((buffer) => fromMidi(parseMidi(buffer)));
       this.#scores.set(song.id, score);
       // A failed download is tried again the next time the song is chosen.
       score.catch(() => this.#scores.delete(song.id));

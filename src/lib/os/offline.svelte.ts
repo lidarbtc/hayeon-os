@@ -1,4 +1,3 @@
-import { photos, photoUrl, thumbUrl } from './photos.svelte';
 import { session } from './session.svelte';
 
 /** Set once a newer build has been saved for the next start. */
@@ -36,15 +35,4 @@ export function startOffline() {
     ask();
     setTimeout(ask, 6000);
   });
-}
-
-/** Asks the service worker to save every photo, thumbnails first. */
-export function keepPhotos() {
-  if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;
-  const saver = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
-  if (saver) return;
-  const urls = [...photos.map(thumbUrl), ...photos.map(photoUrl)].map((url) => new URL(url, document.baseURI).href);
-  navigator.serviceWorker.ready
-    .then((registration) => registration.active?.postMessage({ type: 'hayeon-os:photos', urls }))
-    .catch(() => {});
 }

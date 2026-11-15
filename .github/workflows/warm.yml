@@ -46,8 +46,9 @@ jobs:
 
       - name: Ask both gateways for every file
         run: |
-          # The page itself, then everything in public/ (photos, sw.js, favicon).
-          { echo index.html; find public -type f -printf '%P\n'; } > files.txt
+          # The page itself, the pack of photos and music that the build adds, then
+          # everything in public/ (sw.js, favicon and the single photos and songs).
+          { echo index.html; echo pack.bin; find public -type f -printf '%P\n'; } > files.txt
 
           warm() {
             for host in hayeon.eth.limo hayeon.eth.link; do
