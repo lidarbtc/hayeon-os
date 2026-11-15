@@ -74,19 +74,56 @@
     {/if}
   </svg>
 {:else if name === 'triples'}
-  <!-- The triples.love mark. -->
+  <!-- The triples.love mark on a glossy aqua tile. -->
   <svg viewBox="0 0 64 64" width={size} height={size} aria-hidden="true">
-    <rect width="64" height="64" rx="16" fill="#18171f" />
-    <g fill="none" stroke="#fff" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round">
+    <defs>
+      <linearGradient id="{uid}-tile" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#7fd9f5" />
+        <stop offset=".48" stop-color="#36b2e0" />
+        <stop offset=".52" stop-color="#1f97cf" />
+        <stop offset="1" stop-color="#0d5f9e" />
+      </linearGradient>
+      <radialGradient id="{uid}-glow" cx=".5" cy="1" r=".6">
+        <stop offset="0" stop-color="#b8fff0" stop-opacity=".85" />
+        <stop offset="1" stop-color="#b8fff0" stop-opacity="0" />
+      </radialGradient>
+      <linearGradient id="{uid}-shine" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#fff" stop-opacity=".6" />
+        <stop offset="1" stop-color="#fff" stop-opacity=".04" />
+      </linearGradient>
+      <linearGradient id="{uid}-ink" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#fff" />
+        <stop offset="1" stop-color="#dcf6ff" />
+      </linearGradient>
+    </defs>
+    <rect x=".5" y=".5" width="63" height="63" rx="15.5" fill="url(#{uid}-tile)" stroke="#0a4f7e" />
+    <rect x=".5" y=".5" width="63" height="63" rx="15.5" fill="url(#{uid}-glow)" />
+    <path d="M16 2h32a14 14 0 0 1 14 14v11Q32 33 2 27V16A14 14 0 0 1 16 2z" fill="url(#{uid}-shine)" />
+    <!-- A soft shadow under the mark, then the mark. -->
+    <g transform="translate(0 1.8)" opacity=".5">
+      <g fill="none" stroke="#04375a" stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16.5 20.5c3.7-5.9 10.7-8.6 17.3-6.7 6.9 1.9 11.7 7.5 12.8 14.1" />
+        <path d="M48.3 42.1c-3.5 6.1-10.7 9-17.6 7.4-6.9-1.6-12.2-6.9-13.6-13.6" />
+        <path d="M17.1 35.7c-5.1-4.8-6.1-12.5-2.4-18.4 3.7-5.9 10.7-8.8 17.3-6.9" />
+      </g>
+      <g fill="#04375a">
+        <circle cx="47.2" cy="28.5" r="5.8" />
+        <circle cx="16.8" cy="35.2" r="5.8" />
+        <circle cx="32.5" cy="12.5" r="5.8" />
+      </g>
+    </g>
+    <g fill="none" stroke="url(#{uid}-ink)" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M16.5 20.5c3.7-5.9 10.7-8.6 17.3-6.7 6.9 1.9 11.7 7.5 12.8 14.1" />
       <path d="M48.3 42.1c-3.5 6.1-10.7 9-17.6 7.4-6.9-1.6-12.2-6.9-13.6-13.6" />
       <path d="M17.1 35.7c-5.1-4.8-6.1-12.5-2.4-18.4 3.7-5.9 10.7-8.8 17.3-6.9" />
     </g>
-    <g fill="#fff">
+    <g fill="url(#{uid}-ink)">
       <circle cx="47.2" cy="28.5" r="5.3" />
       <circle cx="16.8" cy="35.2" r="5.3" />
       <circle cx="32.5" cy="12.5" r="5.3" />
     </g>
+    <path d="M16 2h32a14 14 0 0 1 14 14v5Q32 26 2 21v-5A14 14 0 0 1 16 2z" fill="#fff" fill-opacity=".18" />
+    <rect x="2" y="2" width="60" height="60" rx="14" fill="none" stroke="#fff" stroke-opacity=".55" />
   </svg>
 {:else if name === 'archive'}
   <!-- hayeonarchive.com: a serif H with a heart and a hedgehog, after that site's own mark. -->
