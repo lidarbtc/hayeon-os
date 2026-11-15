@@ -53,7 +53,7 @@ async function page(event) {
   return (await fresh) ?? fetch(event.request);
 }
 
-// Photo addresses carry a content hash, so a saved photo never goes stale.
+// Photo and music addresses carry a content hash, so a saved copy never goes stale.
 async function kept(event) {
   const cache = await caches.open(CACHE);
   const saved = await cache.match(event.request.url);
@@ -105,11 +105,23 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET' || !request.url.startsWith(scope)) return;
   const path = new URL(request.url).pathname.slice(scopePath.length);
   if (path === '' || path === 'index.html') event.respondWith(page(event));
-  else if (path.startsWith('photos/') || path === 'favicon.svg') event.respondWith(kept(event));
+  else if (path.startsWith('photos/') || path.startsWith('music/') || path === 'favicon.svg') event.respondWith(kept(event));
 });
 
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'hayeon-os:photos' && Array.isArray(event.data.urls)) {
     event.waitUntil(keepPhotos(event.data.urls));
+  }
+  // A page tells which build it is running and hears back if a newer one is saved.
+  // The announcement after a refresh can reach a page before it is listening.
+  if (event.data?.type === 'hayeon-os:build') {
+    event.waitUntil(
+      (async () => {
+        const saved = await (await caches.open(CACHE)).match(scope);
+        if (saved && buildOf(await saved.text()) > Number(event.data.build)) {
+          event.source?.postMessage({ type: 'hayeon-os:update' });
+        }
+      })()
+    );
   }
 });

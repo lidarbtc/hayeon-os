@@ -1,26 +1,28 @@
-// The media player has no audio files. Each track is a short pattern that is
-// synthesized with WebAudio while it plays.
+// The media player holds no recordings. Every song is a list of notes that the
+// synth in synth.ts performs while it plays: the tripleS songs come from MIDI
+// files (public/music, made by scripts/music.py) and the three house tunes from
+// the patterns below.
 
-export interface Track {
+import remixes from './music.json';
+import { parseMidi } from './midi';
+import { fromMidi, fromPattern, type Pattern, type Score } from './score';
+import { Rack } from './synth';
+
+export interface Song {
+  id: string;
   title: string;
+  album: string;
+  /** The unit that sang it, when it was not the whole group. */
+  unit: string;
+  year: number;
   bpm: number;
-  /** One entry per bar: the bass note and the chord tones the arpeggio picks from (MIDI numbers). */
-  bars: { bass: number; tones: number[] }[];
-  /** Patterns have sixteen steps per bar. In arp a digit picks a chord tone and a dot is a rest. */
-  arp: string;
-  arpWave: OscillatorType;
-  arpGain: number;
-  /** In the patterns below an x plays and a dot rests. */
-  bassLine: string;
-  bassWave: OscillatorType;
-  kick: string;
-  snare: string;
-  hat: string;
-  /** Hold each bar's chord quietly underneath. */
-  pad: boolean;
+  seconds: number;
+  /** Content hash of the MIDI file, so a saved copy is never stale. */
+  rev?: string;
+  pattern?: Pattern;
 }
 
-export const tracks: Track[] = [
+const house: Pattern[] = [
   {
     title: '물방울',
     bpm: 108,
@@ -31,14 +33,12 @@ export const tracks: Track[] = [
       { bass: 43, tones: [59, 62, 67, 71] }
     ],
     arp: '0.2.1.3.2.1.3.5.',
-    arpWave: 'triangle',
-    arpGain: 0.16,
     bassLine: 'x.....x.x.......',
-    bassWave: 'triangle',
     kick: 'x...x...x...x...',
     snare: '................',
     hat: '..x...x...x...x.',
-    pad: true
+    pad: true,
+    loops: 12
   },
   {
     title: '터쿼이즈 드라이브',
@@ -50,14 +50,12 @@ export const tracks: Track[] = [
       { bass: 43, tones: [55, 59, 62, 67] }
     ],
     arp: '0123210301232104',
-    arpWave: 'square',
-    arpGain: 0.045,
     bassLine: 'x.x.x.x.x.x.x.x.',
-    bassWave: 'sawtooth',
     kick: 'x...x...x...x...',
     snare: '....x.......x...',
     hat: 'x.x.x.x.x.x.x.xx',
-    pad: false
+    pad: false,
+    loops: 14
   },
   {
     title: '밤 언덕',
@@ -69,167 +67,151 @@ export const tracks: Track[] = [
       { bass: 36, tones: [60, 64, 67, 71] }
     ],
     arp: '0...2...1...3.2.',
-    arpWave: 'sine',
-    arpGain: 0.2,
     bassLine: 'x...............',
-    bassWave: 'sine',
     kick: 'x.........x.....',
     snare: '................',
     hat: '....x.......x...',
-    pad: true
+    pad: true,
+    loops: 8
   }
 ];
 
-function hz(midi: number) {
-  return 440 * 2 ** ((midi - 69) / 12);
-}
+export const songs: Song[] = [
+  ...(remixes as Song[]),
+  ...house.map((pattern, index) => ({
+    id: 'house-' + index,
+    title: pattern.title,
+    album: 'HaYeon OS',
+    unit: '',
+    year: 2007,
+    bpm: pattern.bpm,
+    seconds: (pattern.bars.length * pattern.loops * 240) / pattern.bpm,
+    pattern
+  }))
+];
 
 class Player {
   playing = $state(false);
   index = $state(0);
   volume = $state(0.7);
+  /** The notes of the selected song are on their way. */
+  loading = $state(false);
+  /** The notes of the selected song could not be fetched. */
+  failed = $state(false);
 
   #ctx: AudioContext | null = null;
-  #master: GainNode | null = null;
-  #analyser: AnalyserNode | null = null;
-  #noise: AudioBuffer | null = null;
+  #rack: Rack | null = null;
+  #scores = new Map<string, Promise<Score>>();
+  #score: Score | null = null;
   #timer: ReturnType<typeof setInterval> | undefined;
-  #step = 0;
-  /** Context time at which the next step is due. */
-  #next = 0;
-  /** Context time at which the current track started. */
+  /** Index of the next cue to hand to the synth. */
+  #cursor = 0;
+  /** Context time at which the current song is (or would have been) at zero. */
   #origin = 0;
-  /** True until the selected track has actually started. */
+  /** True until the selected song has actually started. */
   #fresh = true;
+  /** Counts song changes, so a slow download cannot start a song that is no longer wanted. */
+  #turn = 0;
 
   /** Set once something has played; the visualizer reads the spectrum from it. */
   get analyser() {
-    return this.#analyser;
+    return this.#rack?.analyser ?? null;
+  }
+
+  get song() {
+    return songs[this.index];
   }
 
   // Browsers only allow sound after a click, so the audio graph is built on first play.
   #ensure() {
     if (this.#ctx) return this.#ctx;
     if (typeof AudioContext === 'undefined') return null;
-    const ctx = new AudioContext();
-    const master = ctx.createGain();
-    master.gain.value = this.volume;
-    const limiter = ctx.createDynamicsCompressor();
-    const analyser = ctx.createAnalyser();
-    analyser.fftSize = 512;
-    analyser.smoothingTimeConstant = 0.72;
-    master.connect(limiter).connect(analyser).connect(ctx.destination);
-
-    const noise = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.3), ctx.sampleRate);
-    const samples = noise.getChannelData(0);
-    for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
-
-    this.#ctx = ctx;
-    this.#master = master;
-    this.#analyser = analyser;
-    this.#noise = noise;
-    return ctx;
+    this.#ctx = new AudioContext();
+    this.#rack = new Rack(this.#ctx, this.volume);
+    return this.#ctx;
   }
 
-  #tone(time: number, freq: number, length: number, wave: OscillatorType, peak: number, attack: number, cutoff?: number) {
-    const ctx = this.#ctx!;
-    const osc = ctx.createOscillator();
-    osc.type = wave;
-    osc.frequency.value = freq;
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0.0001, time);
-    gain.gain.exponentialRampToValueAtTime(peak, time + attack);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + length);
-    if (cutoff) {
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.value = cutoff;
-      osc.connect(filter).connect(gain);
-    } else {
-      osc.connect(gain);
+  #load(song: Song) {
+    let score = this.#scores.get(song.id);
+    if (!score) {
+      score = song.pattern
+        ? Promise.resolve(fromPattern(song.pattern))
+        : fetch(import.meta.env.BASE_URL + 'music/' + song.id + '.mid?v=' + song.rev)
+            .then((response) => {
+              if (!response.ok) throw new Error('HTTP ' + response.status);
+              return response.arrayBuffer();
+            })
+            .then((buffer) => fromMidi(parseMidi(buffer)));
+      this.#scores.set(song.id, score);
+      // A failed download is tried again the next time the song is chosen.
+      score.catch(() => this.#scores.delete(song.id));
     }
-    gain.connect(this.#master!);
-    osc.start(time);
-    osc.stop(time + length + 0.02);
+    return score;
   }
 
-  #kick(time: number) {
-    const ctx = this.#ctx!;
-    const osc = ctx.createOscillator();
-    osc.frequency.setValueAtTime(150, time);
-    osc.frequency.exponentialRampToValueAtTime(45, time + 0.12);
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0.8, time);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.24);
-    osc.connect(gain).connect(this.#master!);
-    osc.start(time);
-    osc.stop(time + 0.26);
-  }
-
-  #hit(time: number, type: BiquadFilterType, freq: number, peak: number, length: number) {
-    const ctx = this.#ctx!;
-    const source = ctx.createBufferSource();
-    source.buffer = this.#noise;
-    const filter = ctx.createBiquadFilter();
-    filter.type = type;
-    filter.frequency.value = freq;
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(peak, time);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + length);
-    source.connect(filter).connect(gain).connect(this.#master!);
-    source.start(time);
-    source.stop(time + length + 0.02);
-  }
-
-  #schedule(track: Track, step: number, time: number, stepLength: number) {
-    const bar = track.bars[Math.floor(step / 16) % track.bars.length];
-    const at = step % 16;
-    if (track.pad && at === 0) {
-      for (const tone of bar.tones) this.#tone(time, hz(tone), stepLength * 16, 'sine', 0.04, 0.3);
-    }
-    const pick = track.arp[at];
-    if (pick !== '.') {
-      // Picks past the end of the chord climb an octave.
-      const n = Number(pick);
-      const tone = bar.tones[n % bar.tones.length] + 12 * Math.floor(n / bar.tones.length);
-      this.#tone(time, hz(tone), stepLength * 1.8, track.arpWave, track.arpGain, 0.005);
-    }
-    if (track.bassLine[at] === 'x') this.#tone(time, hz(bar.bass), stepLength * 1.7, track.bassWave, 0.24, 0.005, 520);
-    if (track.kick[at] === 'x') this.#kick(time);
-    if (track.snare[at] === 'x') this.#hit(time, 'bandpass', 1800, 0.4, 0.14);
-    if (track.hat[at] === 'x') this.#hit(time, 'highpass', 7000, 0.2, 0.05);
-  }
-
-  // Runs every few milliseconds and queues the notes that fall due shortly. Hidden
-  // tabs get their timers slowed down, so they queue much further ahead.
+  // Runs every few milliseconds and hands over the cues that fall due shortly.
+  // Hidden tabs get their timers slowed down, so they look much further ahead.
   #tick = () => {
     const ctx = this.#ctx;
-    if (!ctx) return;
-    const track = tracks[this.index];
-    const stepLength = 60 / track.bpm / 4;
-    const ahead = document.hidden ? 1.6 : 0.15;
-    if (this.#next < ctx.currentTime) this.#next = ctx.currentTime + 0.02;
-    while (this.#next < ctx.currentTime + ahead) {
-      this.#schedule(track, this.#step, this.#next, stepLength);
-      this.#next += stepLength;
-      this.#step = (this.#step + 1) % (track.bars.length * 16);
+    const score = this.#score;
+    if (!ctx || !score) return;
+    const now = ctx.currentTime;
+    const horizon = now + (document.hidden ? 1.6 : 0.2);
+    while (this.#cursor < score.cues.length && this.#origin + score.cues[this.#cursor].t < horizon) {
+      const cue = score.cues[this.#cursor++];
+      const at = this.#origin + cue.t;
+      // After a stall, skip what is already in the past instead of playing it all at once.
+      if (at > now - 0.06) this.#rack!.play(cue, Math.max(at, now));
     }
+    if (now > this.#origin + score.seconds + 1.2) this.skip(1);
   };
 
-  /** Play the given track from its start, or carry on with the current one. */
+  /** Starts the current song at the given position. */
+  #begin(score: Score, from: number) {
+    const ctx = this.#ctx!;
+    this.#score = score;
+    this.#rack!.reset(score.step);
+    this.#origin = ctx.currentTime + 0.08 - from;
+    this.#cursor = 0;
+    while (this.#cursor < score.cues.length && score.cues[this.#cursor].t < from) {
+      const cue = score.cues[this.#cursor++];
+      // Chords held across the new position carry on from here.
+      const left = cue.t + cue.d - from;
+      if (cue.voice === 'pad' && left > 0.3) this.#rack!.play(cue, ctx.currentTime + 0.08, left);
+    }
+  }
+
+  /** Play the given song from its start, or carry on with the current one. */
   play(index = this.index) {
     const ctx = this.#ensure();
     if (!ctx) return;
-    if (index !== this.index || this.#fresh) {
-      this.index = index;
-      this.#step = 0;
-      this.#origin = ctx.currentTime;
-      this.#next = ctx.currentTime + 0.08;
-      this.#fresh = false;
-    }
     void ctx.resume();
-    this.#timer ??= setInterval(this.#tick, 25);
     this.playing = true;
+    this.#timer ??= setInterval(this.#tick, 25);
+    if (index === this.index && !this.#fresh) return;
+
+    this.index = index;
+    this.#fresh = false;
+    this.#score = null;
+    this.#origin = ctx.currentTime;
+    this.#rack!.reset(0.125);
+    this.failed = false;
+    this.loading = true;
+    const turn = ++this.#turn;
+    this.#load(songs[index]).then(
+      (score) => {
+        if (turn !== this.#turn) return;
+        this.loading = false;
+        this.#begin(score, 0);
+      },
+      () => {
+        if (turn !== this.#turn) return;
+        this.loading = false;
+        this.failed = true;
+        this.pause();
+        this.#fresh = true;
+      }
+    );
   }
 
   pause() {
@@ -240,8 +222,17 @@ class Player {
   }
 
   stop() {
-    this.pause();
+    this.#turn++;
+    this.loading = false;
     this.#fresh = true;
+    this.playing = false;
+    clearInterval(this.#timer);
+    this.#timer = undefined;
+    // Let the sound fade before the clock stops, so nothing is left hanging for the next play.
+    this.#rack?.reset(0.125);
+    setTimeout(() => {
+      if (!this.playing) void this.#ctx?.suspend();
+    }, 120);
   }
 
   toggle() {
@@ -249,25 +240,35 @@ class Player {
     else this.play();
   }
 
-  /** Move to another track: keeps playing if something was playing. */
+  /** Move to another song: keeps playing if something was playing. */
   skip(by: number) {
-    const index = (this.index + by + tracks.length) % tracks.length;
+    const index = (this.index + by + songs.length) % songs.length;
     if (this.playing) {
+      this.#fresh = true;
       this.play(index);
     } else {
+      this.#turn++;
       this.index = index;
       this.#fresh = true;
+      this.failed = false;
     }
+  }
+
+  /** Jump to a position in the current song, in seconds. */
+  seek(seconds: number) {
+    if (!this.#score || this.#fresh) return;
+    this.#begin(this.#score, Math.min(Math.max(0, seconds), this.#score.seconds));
   }
 
   setVolume(volume: number) {
     this.volume = volume;
-    if (this.#master) this.#master.gain.value = volume;
+    this.#rack?.setVolume(volume);
   }
 
-  /** Seconds the current track has been playing. The context clock stops while paused. */
+  /** Seconds into the current song. The context clock stops while paused. */
   elapsed() {
-    return this.#ctx && !this.#fresh ? Math.max(0, this.#ctx.currentTime - this.#origin) : 0;
+    if (!this.#ctx || !this.#score || this.#fresh) return 0;
+    return Math.min(this.#score.seconds, Math.max(0, this.#ctx.currentTime - this.#origin));
   }
 }
 

@@ -71,11 +71,10 @@ registerApps([
     title: '미디어 플레이어',
     icon: 'player',
     component: MediaPlayer,
-    width: 372,
-    height: 420,
-    minWidth: 372,
-    minHeight: 420,
-    resizable: false
+    width: 392,
+    height: 540,
+    minWidth: 340,
+    minHeight: 420
   },
   {
     id: 'terminal',

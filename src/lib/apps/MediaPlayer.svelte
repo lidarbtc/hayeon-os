@@ -1,6 +1,6 @@
 <script lang="ts">
   import { untrack } from 'svelte';
-  import { player, tracks } from '../os/player.svelte';
+  import { player, songs, type Song } from '../os/player.svelte';
   import { wm, type Win } from '../os/wm.svelte';
 
   let { win }: { win: Win } = $props();
@@ -10,11 +10,25 @@
 
   let canvas: HTMLCanvasElement;
   let clock = $state(0);
+  /** Where the position slider is being dragged to, until it is let go. */
+  let scrub = $state<number | null>(null);
 
-  const track = $derived(tracks[player.index]);
+  const song = $derived(player.song);
+
+  // The list, album by album.
+  const albums = (() => {
+    const groups: { label: string; items: { song: Song; index: number }[] }[] = [];
+    songs.forEach((item, index) => {
+      const label = item.pattern ? 'HaYeon OS 기본 음악' : item.year + ' · ' + (item.unit ? item.unit + ' · ' : '') + item.album;
+      const last = groups[groups.length - 1];
+      if (last?.label === label) last.items.push({ song: item, index });
+      else groups.push({ label, items: [{ song: item, index }] });
+    });
+    return groups;
+  })();
 
   $effect(() => {
-    const title = track.title + ' - 미디어 플레이어';
+    const title = song.title + ' - 미디어 플레이어';
     untrack(() => wm.patch(win.id, { title }));
   });
 
@@ -64,7 +78,8 @@
         }
       }
 
-      const now = Math.floor(player.elapsed());
+      // A jump starts a moment ahead of the audio clock; the margin keeps the handle from slipping back a second.
+      const now = Math.floor(player.elapsed() + 0.1);
       if (now !== clock) clock = now;
       frame = requestAnimationFrame(draw);
     });
@@ -72,16 +87,41 @@
   });
 
   function time(seconds: number) {
-    return Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
+    const whole = Math.round(seconds);
+    return Math.floor(whole / 60) + ':' + String(whole % 60).padStart(2, '0');
   }
 </script>
 
 <div class="player">
   <div class="display">
     <canvas bind:this={canvas} width="480" height="150"></canvas>
+    <input
+      class="seek"
+      type="range"
+      min="0"
+      max={Math.round(song.seconds)}
+      step="1"
+      value={scrub ?? clock}
+      aria-label="재생 위치"
+      oninput={(event) => (scrub = Number(event.currentTarget.value))}
+      onchange={(event) => {
+        // Move the clock with the handle so quick key presses add up.
+        clock = Number(event.currentTarget.value);
+        player.seek(clock);
+        scrub = null;
+      }}
+    />
     <div class="now">
-      <span class="name">{track.title}</span>
-      <span>{time(clock)}</span>
+      <span class="name">
+        {#if player.failed}
+          곡을 불러오지 못했습니다
+        {:else if player.loading}
+          {song.title} · 불러오는 중…
+        {:else}
+          {song.title}
+        {/if}
+      </span>
+      <span>{time(scrub ?? clock)} / {time(song.seconds)}</span>
     </div>
   </div>
 
@@ -122,19 +162,24 @@
     </label>
   </div>
 
-  <ol class="list">
-    {#each tracks as item, index (item.title)}
-      <li>
-        <button class:current={index === player.index} onclick={() => player.play(index)}>
-          <span class="no">{index + 1}</span>
-          <span class="title">{item.title}</span>
-          <span class="bpm">{item.bpm} BPM</span>
-        </button>
-      </li>
+  <div class="list">
+    {#each albums as album (album.label)}
+      <h3>{album.label}</h3>
+      <ol>
+        {#each album.items as item (item.song.id)}
+          <li>
+            <button class:current={item.index === player.index} onclick={() => player.play(item.index)}>
+              <span class="no">{item.index + 1}</span>
+              <span class="title">{item.song.title}</span>
+              <span class="length">{time(item.song.seconds)}</span>
+            </button>
+          </li>
+        {/each}
+      </ol>
     {/each}
-  </ol>
+  </div>
 
-  <div class="statusbar"><span>모든 곡은 이 컴퓨터가 직접 연주합니다.</span></div>
+  <div class="statusbar"><span>녹음이 아니라, 이 컴퓨터가 음표를 읽어 직접 연주하는 리믹스입니다.</span></div>
 </div>
 
 <style>
@@ -161,6 +206,14 @@
     display: block;
     width: 100%;
     height: 124px;
+  }
+
+  .seek {
+    display: block;
+    width: calc(100% - 16px);
+    height: 14px;
+    margin: 0 8px;
+    accent-color: #52d9bb;
   }
 
   .now {
@@ -247,8 +300,25 @@
     padding: 2px;
     border: 1px solid #a9bcbf;
     background: #fff;
-    list-style: none;
     overflow-y: auto;
+  }
+
+  .list ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .list h3 {
+    position: sticky;
+    top: -2px;
+    margin: 0;
+    padding: 4px 8px;
+    border-bottom: 1px solid #cfe6e1;
+    color: #075a70;
+    font-size: 12px;
+    font-weight: 600;
+    background: linear-gradient(180deg, #f3fbf9, #dff3ee);
   }
 
   .list button {
@@ -257,7 +327,7 @@
     align-items: center;
     gap: 6px;
     width: 100%;
-    padding: 6px 8px;
+    padding: 5px 8px;
     border: 1px solid transparent;
     border-radius: 2px;
     background: none;
@@ -277,8 +347,15 @@
   }
 
   .no,
-  .bpm {
+  .length {
     color: #5c7f88;
     font-size: 12px;
+  }
+
+  .title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 </style>

@@ -18,7 +18,8 @@ Unofficial fan work. Not affiliated with MODHAUS or tripleS.
 - Desktop gadgets: a photo frame, a birthday countdown and the latest note
 - Notepad, My Computer and a Recycle Bin, backed by `localStorage`
 - Hedgehog Finder, a minesweeper with hedgehogs
-- Media Player, with three tunes synthesised live by Web Audio
+- Media Player: 33 tripleS songs HaYeon sings on, re-performed live by a Web Audio synth as
+  glassy electronic remixes, plus three house tunes
 - A terminal (try `help`)
 - Control Panel: two themes, four wallpapers and a gravity switch
 
@@ -44,6 +45,26 @@ pnpm build    # static files in dist/
 
 Two optional fields: `focus` is a CSS `object-position` that keeps the subject in view when a
 photo is cropped, and `avatar: true` marks the photo used on the welcome screen.
+
+## Music
+
+The player ships no recordings. Each song is a small MIDI file in `public/music` (melody,
+bass, chords and drums) that `src/lib/os/synth.ts` performs with oscillators and noise: a
+bell for the melody, a wide pad that ducks under the kick, droplet plucks, a round bass and
+light drums. `src/lib/os/score.ts` adds an arpeggio and chime sweeps on top of what was
+transcribed.
+
+The MIDI files are made from recordings by `scripts/music.py`:
+
+~~~bash
+python scripts/music.py ~/Music/songs    # "<year> [<unit> - ]<album>/<nn> - <title>.mp3"
+~~~
+
+It splits each song into stems with Demucs, transcribes the vocal and the bass with Basic
+Pitch, reads one chord per half bar and the drum hits from the other stems, and snaps
+everything to a sixteenth-note grid fitted to the recording. It needs ffmpeg and a Python
+environment with `torch`, `demucs`, `basic-pitch` (ONNX), `librosa`, `mido` and
+`soundfile`. The transcription is automatic and imperfect.
 
 ## Guestbook
 
@@ -84,8 +105,11 @@ things keep that from showing:
 | `src/lib/apps` | The programs. Register new ones in `src/lib/os/apps.ts` |
 | `src/lib/ui` | Icons, wallpapers and shared widgets |
 | `scripts/photos.mjs` | The photo importer |
+| `scripts/music.py` | Turns recordings into the MIDI files in `public/music` |
 
 ## License
 
 Code is under [Apache-2.0](LICENSE). The photos in `public/photos` are not part of that
 licence: they are official photos © MODHAUS, credited in [photos/CREDITS.md](photos/CREDITS.md).
+Neither are the MIDI files in `public/music`: they are fan transcriptions of tripleS songs,
+whose compositions belong to their writers and publishers.

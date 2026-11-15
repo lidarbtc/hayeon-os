@@ -27,6 +27,15 @@ export function startOffline() {
     if (event.data?.type === 'hayeon-os:update') onUpdate();
   });
   navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(() => {});
+
+  // Ask whether a newer build than this page is already saved: now, and again
+  // once the background check has had time to finish.
+  const build = Number(document.querySelector('meta[name="build"]')?.getAttribute('content') ?? 0);
+  const ask = () => navigator.serviceWorker.controller?.postMessage({ type: 'hayeon-os:build', build });
+  navigator.serviceWorker.ready.then(() => {
+    ask();
+    setTimeout(ask, 6000);
+  });
 }
 
 /** Asks the service worker to save every photo, thumbnails first. */
