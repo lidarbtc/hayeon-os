@@ -4,6 +4,10 @@ name: Warm the gateways
 # about a second once they hold a file, but need many seconds the first time one
 # of their nodes is asked for it. This job asks for every file a few times after
 # each release, so that visitors are not the ones who wait.
+#
+# Before that it spreads the newest IPNS record. 4EVERLAND stores each new record
+# on only some of the DHT peers nearest to the name; the others keep the previous
+# one for a day, and a gateway that asks them serves the previous release.
 
 on:
   push:
@@ -19,35 +23,38 @@ concurrency:
   group: warm
   cancel-in-progress: true
 
+env:
+  IPNS_NAME: k51qzi5uqu5djosu5m6aionypxo0mv5mmytg12o3u08swhkd8qrxmtooz73ngi
+
 jobs:
   warm:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v5
 
-      - name: Wait for the new release
-        if: github.event_name == 'push'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: tools/ipns-refresh/go.mod
+          cache-dependency-path: tools/ipns-refresh/go.sum
+
+      - name: Spread the newest record to the peers nearest to the name
+        working-directory: tools/ipns-refresh
+        env:
+          PUSHED_AT: ${{ github.event.repository.pushed_at }}
         run: |
-          # The gateway reports the release it serves in the x-ipfs-roots header.
-          release() {
-            curl -sS -I --max-time 30 https://hayeon.eth.limo/ | tr -d '\r' | awk 'tolower($1) == "x-ipfs-roots:" { print $2 }'
-          }
-          before=$(release || true)
-          for attempt in $(seq 1 32); do
-            sleep 15
-            now=$(release || true)
-            if [ -n "$now" ] && [ "$now" != "$before" ]; then
-              echo "New release: $now"
-              exit 0
-            fi
-          done
-          echo "No new release showed up in 8 minutes. Warming what is there."
+          # After a push, wait until the record for this release shows up (4EVERLAND
+          # publishes a minute or two after the push), then spread that one.
+          after=()
+          if [ "$GITHUB_EVENT_NAME" = push ] && [ -n "$PUSHED_AT" ]; then
+            after=(-published-after "$(date -u -d "@$PUSHED_AT" +%Y-%m-%dT%H:%M:%SZ)")
+          fi
+          go run . -name "$IPNS_NAME" "${after[@]}" 2>&1 | grep -v -i -e warn -e resource || true
 
       - name: Ask both gateways for every file
         run: |
           # The page itself, the pack of photos and music that the build adds, then
-          # everything in public/ (sw.js, favicon and the single photos and songs).
+          # everything in public/ (sw.js, icons and the single photos and songs).
           { echo index.html; echo pack.bin; find public -type f -printf '%P\n'; } > files.txt
 
           warm() {

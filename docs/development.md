@@ -28,3 +28,18 @@ It writes `public/music/<id>.mid` and updates `src/lib/os/music.json`. The trans
 ## Guestbook moderation
 
 To hide a note, add its event ID (shown in the tooltip on its timestamp) or the author's public key to `src/lib/os/guestbook-blocked.json` and redeploy.
+
+## Releases and gateways
+
+4EVERLAND builds and publishes every push to `main` under an IPNS name, and the site is reached through eth.limo and eth.link.
+
+4EVERLAND stores each new IPNS record on only some of the DHT peers nearest to the name. The others keep older records until they expire a day later, and the gateways sometimes serve the old release from them. `tools/ipns-refresh` crawls the DHT, takes the newest signed record from the nearest peers and stores it on the ones that lack it. `.github/workflows/warm.yml` runs it after each release and every six hours, then requests every file through both gateways.
+
+To run it by hand (needs Go):
+
+```sh
+cd tools/ipns-refresh
+go run . -name k51qzi5uqu5djosu5m6aionypxo0mv5mmytg12o3u08swhkd8qrxmtooz73ngi -dry-run
+```
+
+Drop `-dry-run` to store the record.
