@@ -20,6 +20,8 @@ export type IconName =
   | 'guestbook'
   | 'github'
   | 'triples'
+  | 'github-tile'
+  | 'archive'
   | 'error'
   | 'question'
   | 'info'

@@ -1,4 +1,5 @@
 import { t } from './i18n';
+import { ARCHIVE_URL, REPO_URL, TRIPLES_URL, outbound } from './about';
 import { DOCUMENTS, README } from './disk';
 import { fs } from './fs.svelte';
 import type { FileRef, IconName } from './types';
@@ -32,7 +33,14 @@ export interface Shortcut {
   id: string;
   label: string;
   readonly icon: IconName;
+  /** Set on shortcuts to other websites, which get the little arrow. */
+  link?: string;
   open(): void;
+}
+
+function website(id: string, label: string, icon: IconName, url: string): Shortcut {
+  const link = outbound(url);
+  return { id, label, icon, link, open: () => void window.open(link, '_blank', 'noopener') };
 }
 
 export const shortcuts = {
@@ -126,5 +134,8 @@ export const shortcuts = {
     open: () => {
       wm.open('control');
     }
-  }
+  },
+  archive: website('archive', t('하연 아카이브', 'Hayeon Archive'), 'archive', ARCHIVE_URL),
+  triples: website('triples', 'triples.love', 'triples', TRIPLES_URL),
+  github: website('github', 'GitHub', 'github-tile', REPO_URL)
 } satisfies Record<string, Shortcut>;

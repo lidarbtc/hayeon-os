@@ -1,6 +1,6 @@
 <script lang="ts">
   import { t } from '../os/i18n';
-  import { REPO_URL, TRIPLES_URL } from '../os/about';
+  import { REPO_URL, TRIPLES_URL, outbound } from '../os/about';
   import { wm, type Win } from '../os/wm.svelte';
   import Icon from '../ui/Icon.svelte';
   import Orb from '../ui/Orb.svelte';
@@ -54,10 +54,10 @@
         <dd><i class="swatch"></i>Medium Turquoise #52D9BB</dd>
         <dt>{t('만든 사람', 'Made by')}</dt>
         <dd class="links">
-          <a href={TRIPLES_URL} target="_blank" rel="noopener" title="triples.love" aria-label="triples.love">
+          <a href={outbound(TRIPLES_URL)} target="_blank" rel="noopener" title="triples.love" aria-label="triples.love">
             <Icon name="triples" size={22} />
           </a>
-          <a href={REPO_URL} target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub">
+          <a href={outbound(REPO_URL)} target="_blank" rel="noopener" title="GitHub" aria-label="GitHub">
             <Icon name="github" size={20} />
           </a>
         </dd>

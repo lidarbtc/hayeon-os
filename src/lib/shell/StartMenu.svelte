@@ -1,6 +1,5 @@
 <script lang="ts">
   import { t } from '../os/i18n';
-  import { REPO_URL, TRIPLES_URL } from '../os/about';
   import { session, type LeaveMode } from '../os/session.svelte';
   import { shortcuts, type Shortcut } from '../os/shell';
   import Avatar from '../ui/Avatar.svelte';
@@ -66,14 +65,6 @@
   </div>
 
   <div class="power">
-    <div class="links">
-      <a href={TRIPLES_URL} target="_blank" rel="noopener" role="menuitem" title="triples.love" aria-label="triples.love">
-        <Icon name="triples" size={20} />
-      </a>
-      <a href={REPO_URL} target="_blank" rel="noopener noreferrer" role="menuitem" title="GitHub" aria-label="GitHub">
-        <Icon name="github" size={18} />
-      </a>
-    </div>
     <button role="menuitem" onclick={() => leave('logoff')}><Icon name="logoff" size={15} />{t('로그오프', 'Log Off')}</button>
     <button role="menuitem" onclick={() => leave('restart')}><Icon name="restart" size={15} />{t('다시 시작', 'Restart')}</button>
     <button role="menuitem" class="shutdown" onclick={() => leave('shutdown')}>
@@ -243,33 +234,6 @@
   .power .shutdown:focus-visible {
     border-color: rgba(90, 20, 10, 0.8);
     background: linear-gradient(180deg, #ffc0b3, #f0624a 46%, #dc3418 50%, #ff9a70);
-  }
-
-  /* Two quiet links, pushed to the far side of the power buttons. */
-  .links {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    margin-right: auto;
-  }
-
-  .links a {
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    color: inherit;
-    opacity: 0.85;
-  }
-
-  .links a:hover,
-  .links a:focus-visible {
-    outline: none;
-    border-color: rgba(255, 255, 255, 0.5);
-    background: rgba(255, 255, 255, 0.16);
-    opacity: 1;
   }
 
   :global([data-theme='luna']) .start-menu {

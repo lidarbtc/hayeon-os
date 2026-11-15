@@ -24,7 +24,10 @@
     shortcuts.hedgehog,
     shortcuts.player,
     shortcuts.terminal,
-    shortcuts.readme
+    shortcuts.readme,
+    shortcuts.archive,
+    shortcuts.triples,
+    shortcuts.github
   ];
 
   let areaWidth = $state(0);
@@ -79,10 +82,21 @@
         <button
           class="icon"
           class:selected={selected === icon.id}
+          title={icon.link ? icon.link.replace(/[?].*/, '') : undefined}
           onclick={(event) => clickIcon(event, icon)}
           ondblclick={() => icon.open()}
         >
-          <Icon name={icon.icon} size={48} />
+          <span class="art">
+            <Icon name={icon.icon} size={48} />
+            {#if icon.link}
+              <!-- The shortcut arrow. -->
+              <svg class="arrow" viewBox="0 0 16 16" width="17" height="17" aria-hidden="true">
+                <rect x=".5" y=".5" width="15" height="15" rx="2" fill="#fff" stroke="#5c6f78" />
+                <path d="M5 11.5c0-3.4 1.9-5.5 5.2-5.5" fill="none" stroke="#0f6fa0" stroke-width="2" stroke-linecap="round" />
+                <path d="M8.6 3.4 11.6 6 8.6 8.6z" fill="#0f6fa0" stroke="#0f6fa0" stroke-linejoin="round" />
+              </svg>
+            {/if}
+          </span>
           <span>{icon.label}</span>
         </button>
       {/each}
@@ -158,6 +172,18 @@
 
   .icon :global(svg) {
     filter: drop-shadow(0 2px 3px rgba(0, 30, 40, 0.45));
+  }
+
+  .art {
+    position: relative;
+    display: block;
+  }
+
+  .art .arrow {
+    position: absolute;
+    left: -1px;
+    bottom: -1px;
+    filter: none;
   }
 
   .icon:hover,
