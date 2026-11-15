@@ -1,5 +1,12 @@
 # HaYeon OS
 
+<a href="https://triples.love/p/hayeonos/?lang=en&amp;utm_source=badge">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://triples.love/badges/listed-dark.svg">
+    <img src="https://triples.love/badges/listed-light.svg" alt="Listed on triples.love" width="216" height="32">
+  </picture>
+</a>
+
 A Windows XP/7-style web desktop for tripleS HaYeon.
 
 [hayeon.eth.link](https://hayeon.eth.link)
