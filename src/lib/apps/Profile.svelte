@@ -40,7 +40,6 @@
     {/each}
   </ol>
 
-  <p class="note">{t('팬이 모아 적은 내용이라 틀린 곳이 있을 수 있습니다.', 'Collected by fans, so some of it may be wrong.')}</p>
 </div>
 
 <style>
@@ -224,9 +223,4 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .note {
-    margin: 16px 2px 0;
-    font-size: 12px;
-    color: #7a9399;
-  }
 </style>

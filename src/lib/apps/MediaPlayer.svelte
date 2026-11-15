@@ -15,6 +15,18 @@
   let scrub = $state<number | null>(null);
 
   const song = $derived(player.song);
+  // What a player of the time showed down here: what it is doing, and what it is playing.
+  const doing = $derived(
+    player.failed
+      ? t('오류', 'Error')
+      : player.loading
+        ? t('불러오는 중', 'Loading')
+        : player.playing
+          ? t('재생 중', 'Playing')
+          : clock > 0
+            ? t('일시 정지', 'Paused')
+            : t('정지', 'Stopped')
+  );
 
   // The list, album by album.
   const albums = (() => {
@@ -180,7 +192,10 @@
     {/each}
   </div>
 
-  <div class="statusbar"><span>{t('녹음이 아니라, 이 컴퓨터가 음표를 읽어 직접 연주하는 리믹스입니다.', 'Remixes played live from the notes, not recordings.')}</span></div>
+  <div class="statusbar">
+    <span>{doing}</span>
+    <span>{song.pattern ? t('신스 연주', 'Synth') : t('MIDI 리믹스', 'MIDI remix')} · {Math.round(song.bpm)} BPM</span>
+  </div>
 </div>
 
 <style>
