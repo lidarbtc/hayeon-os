@@ -120,5 +120,6 @@ things keep that from showing:
 
 Code is under [Apache-2.0](LICENSE). The photos in `public/photos` are not part of that
 licence: they are official photos © MODHAUS, credited in [photos/CREDITS.md](photos/CREDITS.md).
+The link preview image `public/og.jpg` shows one of them, so the same applies to it.
 Neither are the MIDI files in `public/music`: they are fan transcriptions of tripleS songs,
 whose compositions belong to their writers and publishers.

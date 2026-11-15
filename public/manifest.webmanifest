@@ -1,0 +1,16 @@
+{
+  "name": "HaYeon OS",
+  "short_name": "HaYeon OS",
+  "description": "tripleS 정하연 팬이 만든 작은 운영체제. A little operating system made by a fan of tripleS HaYeon.",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f8fa8",
+  "theme_color": "#52d9bb",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
