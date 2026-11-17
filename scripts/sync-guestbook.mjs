@@ -5,6 +5,10 @@ import { parseArgs } from 'node:util';
 import { setTimeout as pause } from 'node:timers/promises';
 import { valid } from '../src/lib/os/nostr.ts';
 import { KIND_NOTE, POW, RELAYS, TOPIC } from '../src/lib/os/guestbook-config.ts';
+import extraRelays from './guestbook-relays.json' with { type: 'json' };
+
+// Browsers use a small connection pool. The scheduled job can cover more relays.
+export const SYNC_RELAYS = [...new Set([...RELAYS, ...extraRelays])];
 
 const TIMEOUT = 12_000;
 const MAX_EVENTS = 20_000;
@@ -12,6 +16,36 @@ const MAX_PUBLISH_PER_RELAY = 500;
 const FILTER = { kinds: [KIND_NOTE], '#t': [TOPIC] };
 const tag = (event, name) => event.tags.find((item) => item[0] === name)?.[1];
 const key = (event) => `${event.pubkey}:${event.kind}:${tag(event, 'd')}`;
+
+class ConnectionError extends Error {}
+
+async function mapConcurrent(items, concurrency, operation) {
+  const results = new Array(items.length);
+  let next = 0;
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (next < items.length) {
+      const index = next++;
+      results[index] = await operation(items[index]);
+    }
+  }));
+  return results;
+}
+
+// Reconnect only for transport failures. Policy refusals and invalid data are
+// final for this run; retrying them cannot make the original signature valid.
+export async function withRelay(url, operation, { sleep = pause, createRelay = (address) => new Relay(address) } = {}) {
+  for (let attempt = 1; ; attempt++) {
+    let relay;
+    try {
+      relay = createRelay(url);
+      await relay.connect();
+      return await operation(relay, attempt);
+    } catch (error) {
+      if (!(error instanceof ConnectionError) || attempt >= 3) throw error;
+    } finally { relay?.close(); }
+    await sleep(attempt * 2000);
+  }
+}
 
 export function acceptable(event, now = Math.floor(Date.now() / 1000)) {
   return !!event && event.kind === KIND_NOTE && valid(event, event.content ? POW : 0) &&
@@ -59,7 +93,7 @@ export class Relay {
         socket.removeEventListener('open', opened);
         error ? reject(error) : resolve(value);
       };
-      const closed = () => finish(new Error('Connection closed or failed'));
+      const closed = () => finish(new ConnectionError('Connection closed or failed'));
       const opened = () => finish(null);
       const message = ({ data }) => {
         try {
@@ -70,14 +104,14 @@ export class Relay {
           if (result !== undefined) finish(null, result);
         } catch (error) { finish(error); }
       };
-      const timer = setTimeout(() => finish(new Error('Relay timed out')), this.timeout);
+      const timer = setTimeout(() => finish(new ConnectionError('Relay timed out')), this.timeout);
       socket.addEventListener('message', message);
       socket.addEventListener('close', closed);
       socket.addEventListener('error', closed);
       if (readyEvent) socket.addEventListener('open', opened);
       try {
         if (outbound) {
-          if (socket.readyState !== 1) throw new Error('Relay is not open');
+          if (socket.readyState !== 1) throw new ConnectionError('Relay is not open');
           socket.send(JSON.stringify(outbound));
         } else if (socket.readyState > 1) closed();
       } catch (error) { finish(error); }
@@ -130,7 +164,7 @@ export async function collectRelay(relay, limit = 100, now = Math.floor(Date.now
     }
     return page;
   };
-  for (let pageNumber = 0; pageNumber < 1000 && until >= 0; pageNumber++) {
+  for (let pageNumber = 0; pageNumber <= MAX_EVENTS && until >= 0; pageNumber++) {
     const page = await read({ until });
     if (!page.length) return [...events.values()];
     const oldest = Math.min(...page.map((event) => event.created_at));
@@ -155,17 +189,21 @@ async function saveJson(path, value) {
   await rename(`${path}.tmp`, path);
 }
 
-async function pageLimit(url) {
+async function relayInformation(url) {
   // NIP-11 can advertise a lower cap. Failure to obtain it does not imply that
   // WebSocket reads are unavailable; use a modest default in that case.
   try {
     const response = await fetch(url.replace('wss:', 'https:'), {
       headers: { Accept: 'application/nostr+json' }, signal: AbortSignal.timeout(5000)
     });
-    const maximum = (await response.json()).limitation?.max_limit;
-    if (Number.isInteger(maximum) && maximum > 0) return Math.min(100, maximum);
+    if (!response.ok) return { limit: 100 };
+    const info = await response.json();
+    const maximum = info.limitation?.max_limit;
+    const limit = Number.isInteger(maximum) && maximum > 0 ? Math.min(100, maximum) : 100;
+    const policy = ['auth_required', 'payment_required', 'restricted_writes'].find((name) => info.limitation?.[name] === true);
+    return { limit, ...(policy ? { policy: `NIP-11 ${policy}` } : {}) };
   } catch { /* Use the default below. */ }
-  return 100;
+  return { limit: 100 };
 }
 
 async function report(title, rows) {
@@ -178,20 +216,17 @@ async function report(title, rows) {
   }
 }
 
-export async function collect(archivePath, planPath) {
+export async function collect(archivePath, planPath, { relays = SYNC_RELAYS, sleep = pause } = {}) {
   const archive = await readJson(archivePath, { version: 1, events: [] });
   if (archive.version !== 1 || !Array.isArray(archive.events) || archive.events.length > MAX_EVENTS ||
       !archive.events.every((event) => acceptable(event))) throw new Error('Invalid backup; refusing to overwrite it');
-  const snapshots = await Promise.all(RELAYS.map(async (url) => {
-    let relay;
+  const snapshots = await mapConcurrent(relays, 8, async (url) => {
     try {
-      const limit = await pageLimit(url);
-      relay = new Relay(url);
-      await relay.connect();
-      return { url, events: await collectRelay(relay, limit) };
+      const { limit, policy } = await relayInformation(url);
+      if (policy) return { url, error: policy };
+      return await withRelay(url, async (relay, attempts) => ({ url, limit, attempts, events: await collectRelay(relay, limit) }), { sleep });
     } catch (error) { return { url, error: error.message }; }
-    finally { relay?.close(); }
-  }));
+  });
   const successful = snapshots.filter((snapshot) => !snapshot.error);
   if (!successful.length) {
     await report('Guestbook collection failed', snapshots);
@@ -201,49 +236,70 @@ export async function collect(archivePath, planPath) {
   if (events.length > MAX_EVENTS) throw new Error('Merged backup exceeds event limit');
   // Persist the archive in Git before the separate publish command is run.
   await saveJson(archivePath, { version: 1, events });
-  const relays = snapshots.map(({ url, events, error }) => ({ url, ids: events?.map((event) => event.id) ?? [], ...(error ? { error } : {}) }));
-  await saveJson(planPath, { version: 1, created_at: Math.floor(Date.now() / 1000), relays });
-  await report('Guestbook collected', relays.map(({ url, ids, error }) => ({ url, events: ids.length, ...(error ? { error } : {}) })));
+  const destinations = snapshots.map(({ url, events, error, limit, attempts }) => ({ url, limit, attempts, ids: events?.map((event) => event.id) ?? [], ...(error ? { error } : {}) }));
+  await saveJson(planPath, { version: 1, created_at: Math.floor(Date.now() / 1000), relays: destinations });
+  await report('Guestbook collected', destinations.map(({ url, ids, error, attempts }) => ({ url, events: ids.length, attempts, ...(error ? { error } : {}) })));
   console.log(`Archived ${events.length} current records, including ${events.filter((event) => !event.content).length} removals.`);
 }
 
-export async function publish(archivePath, planPath) {
+export async function publish(archivePath, planPath, { relays = SYNC_RELAYS, sleep = pause } = {}) {
   const archive = await readJson(archivePath);
   const plan = await readJson(planPath);
   const blocked = await readJson(new URL('../src/lib/os/guestbook-blocked.json', import.meta.url));
   if (archive.version !== 1 || !Array.isArray(archive.events) || !archive.events.every((event) => acceptable(event)) ||
       plan.version !== 1 || !Array.isArray(plan.relays) || !Number.isInteger(plan.created_at) ||
       Math.abs(Date.now() / 1000 - plan.created_at) > 1800) throw new Error('Invalid or stale replication plan');
-  const rows = [];
-  for (const snapshot of plan.relays) {
-    if (!RELAYS.includes(snapshot.url) || snapshot.error) {
-      rows.push({ url: snapshot.url, skipped: 'Collection unavailable; retry next run' });
-      continue;
+  if (archive.events.length > MAX_EVENTS || plan.relays.length > relays.length ||
+      new Set(plan.relays.map((snapshot) => snapshot.url)).size !== plan.relays.length ||
+      plan.relays.some((snapshot) => !relays.includes(snapshot.url) || !Array.isArray(snapshot.ids) ||
+        snapshot.ids.some((id) => typeof id !== 'string' || !/^[0-9a-f]{64}$/.test(id)) ||
+        (snapshot.limit !== undefined && (!Number.isInteger(snapshot.limit) || snapshot.limit < 1 || snapshot.limit > 100)))) {
+    throw new Error('Invalid replication destinations');
+  }
+  const desired = missingEvents(archive.events, [], blocked);
+  const rows = await mapConcurrent(plan.relays, 6, async (snapshot) => {
+    if (snapshot.error) {
+      return { url: snapshot.url, skipped: snapshot.error, retry: 'Next scheduled run' };
     }
-    const events = missingEvents(archive.events, snapshot.ids, blocked);
-    const result = { url: snapshot.url, missing: events.length, accepted: 0, rejected: 0 };
+    const events = missingEvents(desired, snapshot.ids, blocked);
+    const result = { url: snapshot.url, expected: desired.length, verified: desired.length - events.length, missing: events.length, accepted: 0, rejected: 0 };
     if (events.length) {
-      const relay = new Relay(snapshot.url);
+      // Keep acknowledged progress on reconnect; only the unacknowledged event
+      // may be sent again, still with its original ID and signature.
+      let cursor = 0;
+      events.sort((a, b) => Number(!!a.content) - Number(!!b.content));
+      const batch = events.slice(0, MAX_PUBLISH_PER_RELAY);
+      result.deferred = events.length - batch.length;
       try {
-        await relay.connect();
-        // Send removals first, with a bounded rate and no retries in a tight loop.
-        events.sort((a, b) => Number(!!a.content) - Number(!!b.content));
-        result.deferred = Math.max(0, events.length - MAX_PUBLISH_PER_RELAY);
-        for (const event of events.slice(0, MAX_PUBLISH_PER_RELAY)) {
-          const ack = await relay.publish(event);
-          if (ack.accepted) result.accepted++;
-          else { result.rejected++; result.lastRejection = ack.reason; }
-          await pause(250);
-        }
+        await withRelay(snapshot.url, async (relay, attempts) => {
+          result.attempts = attempts;
+          while (cursor < batch.length) {
+            const ack = await relay.publish(batch[cursor]);
+            if (ack.accepted) result.accepted++;
+            else { result.rejected++; result.lastRejection = ack.reason; }
+            cursor++;
+            await sleep(250);
+          }
+          // An OK is not evidence that a query can retrieve the event. Count
+          // coverage using readback, not connections or ACKs alone.
+          const stored = new Set((await collectRelay(relay, snapshot.limit ?? 100)).map((event) => event.id));
+          result.verified = desired.filter((event) => stored.has(event.id)).length;
+        }, { sleep });
       } catch (error) { result.error = error.message; }
-      finally { relay.close(); }
     }
-    rows.push(result);
-  }
+    result.remaining = result.expected - result.verified;
+    result.complete = result.remaining === 0;
+    return result;
+  });
   await report('Guestbook replication', rows);
-  if (rows.some((row) => row.missing > 0) && !rows.some((row) => row.accepted > 0)) {
-    throw new Error('No missing event was accepted; backup is safe, inspect relay errors');
+  const coverage = { candidates: rows.length, readable: rows.filter((row) => !row.skipped).length, complete: rows.filter((row) => row.complete).length, expected: desired.length };
+  await report('Guestbook relay coverage', [coverage]);
+  const incomplete = rows.filter((row) => !row.complete).length;
+  if (incomplete) {
+    const warning = `${incomplete}/${rows.length} relays incomplete or unavailable; backup saved, retry next scheduled run`;
+    console.warn(process.env.GITHUB_ACTIONS ? `::warning::${warning}` : warning);
   }
+  return { rows, coverage };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

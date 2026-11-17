@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { build } from '../src/lib/os/nostr.ts';
-import { KIND_NOTE, TOPIC } from '../src/lib/os/guestbook-config.ts';
+import { KIND_NOTE, TOPIC, RELAYS } from '../src/lib/os/guestbook-config.ts';
 import { acceptable, mergeEvents, missingEvents, collectRelay, Relay, collect, publish } from './sync-guestbook.mjs';
 import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -21,6 +21,7 @@ const removal = await fixture(now - 10, 'note-a');
 const another = await fixture(now - 30, 'note-b', 'Another note');
 const tied = await fixture(now - 20, 'note-a');
 const emptyBlockList = { ids: [], pubkeys: [] };
+const options = { relays: RELAYS, sleep: async () => {} };
 
 test('accepts legacy notes and removals; rejects tampering, other kinds/topics and future dates', async () => {
   assert.equal(acceptable(note), true);
@@ -138,11 +139,11 @@ test('collection makes no writes; backup restores missing copies without resurre
       }
     });
   });
-  await collect(archive, plan);
+  await collect(archive, plan, options);
   assert.equal(writes.length, 0);
   const saved = JSON.parse(await readFile(archive, 'utf8'));
   assert.deepEqual(saved.events, mergeEvents([removal, another]));
-  await publish(archive, plan);
+  await publish(archive, plan, options);
   assert.equal(writes.length, 5);
   assert.ok(writes.every((event) => JSON.stringify(event) === JSON.stringify(another)));
 });
@@ -153,7 +154,7 @@ test('corrupt backups fail before any network call or overwrite', async (t) => {
   const archive = join(directory, 'events.json');
   const corrupt = '{not json';
   await writeFile(archive, corrupt);
-  await assert.rejects(collect(archive, join(directory, 'plan.json')));
+  await assert.rejects(collect(archive, join(directory, 'plan.json'), options));
   assert.equal(await readFile(archive, 'utf8'), corrupt);
 });
 
@@ -170,7 +171,7 @@ test('all-source failure preserves the backup and produces no replication plan',
       if (message[0] === 'REQ') ws.receive(['CLOSED', message[1], 'restricted: unavailable']);
     });
   });
-  await assert.rejects(collect(archive, plan), /No relay completed/);
+  await assert.rejects(collect(archive, plan, options), /No relay completed/);
   assert.equal(await readFile(archive, 'utf8'), saved);
   await assert.rejects(readFile(plan), { code: 'ENOENT' });
 });
@@ -201,9 +202,111 @@ test('partial source failure keeps archived removals and excludes unavailable de
       }
     });
   });
-  await collect(archive, plan);
-  await publish(archive, plan);
+  await collect(archive, plan, options);
+  await publish(archive, plan, options);
   assert.equal(writes.length, 4);
   assert.ok(writes.every(({ url, event }) => !url.includes('primal') && event.id === removal.id));
   assert.deepEqual(JSON.parse(await readFile(archive, 'utf8')).events, [removal]);
+});
+
+async function replicationFixture(t, events, snapshots) {
+  const directory = await mkdtemp(join(tmpdir(), 'guestbook-publish-test-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const archive = join(directory, 'events.json');
+  const plan = join(directory, 'plan.json');
+  await writeFile(archive, JSON.stringify({ version: 1, events }));
+  await writeFile(plan, JSON.stringify({ version: 1, created_at: Math.floor(Date.now() / 1000), relays: snapshots }));
+  return { archive, plan };
+}
+
+test('a failed missing copy is a warning when the other relays already have the archive', async (t) => {
+  const snapshots = RELAYS.map((url, index) => ({ url, ids: index < 3 ? [another.id] : [], ...(index === 4 ? { error: 'Connection closed or failed' } : {}) }));
+  const { archive, plan } = await replicationFixture(t, [another], snapshots);
+  const sockets = [];
+  t.mock.method(globalThis, 'WebSocket', function (url) {
+    const socket = new FakeSocket((message, ws) => { if (message[0] === 'EVENT') ws.close(); });
+    sockets.push({ url, socket });
+    return socket;
+  });
+  const result = await publish(archive, plan, options);
+  assert.deepEqual(result.coverage, { candidates: 5, readable: 4, complete: 3, expected: 1 });
+  assert.equal(sockets.length, 3, 'reconnect a transient failure at most three times');
+  assert.ok(sockets.every(({ url, socket }) => url === RELAYS[3] && socket.readyState === 3));
+  assert.equal(result.rows[3].accepted, 0);
+  assert.equal(result.rows[3].remaining, 1);
+  assert.match(result.rows[3].error, /Connection closed/);
+});
+
+test('reconnect resumes after acknowledged events and readback verifies unchanged signed copies', async (t) => {
+  const { archive, plan } = await replicationFixture(t, [removal, another], [{ url: RELAYS[0], ids: [] }]);
+  const stored = [];
+  const sent = [];
+  let connections = 0;
+  t.mock.method(globalThis, 'WebSocket', function () {
+    const connection = ++connections;
+    return new FakeSocket((message, ws) => {
+      if (message[0] === 'EVENT') {
+        sent.push(message[1]);
+        if (connection === 1 && message[1].id === another.id) { ws.close(); return; }
+        stored.push(message[1]);
+        ws.receive(['OK', message[1].id, true, '']);
+      } else if (message[0] === 'REQ') {
+        const filter = message[2];
+        for (const event of stored.filter((event) => event.created_at <= filter.until &&
+          (filter.since === undefined || event.created_at >= filter.since))) ws.receive(['EVENT', message[1], event]);
+        ws.receive(['EOSE', message[1]]);
+      }
+    });
+  });
+  const { rows, coverage } = await publish(archive, plan, options);
+  assert.equal(connections, 2);
+  assert.deepEqual(sent, [removal, another, another]);
+  assert.equal(rows[0].accepted, 2);
+  assert.equal(rows[0].verified, 2);
+  assert.equal(rows[0].remaining, 0);
+  assert.equal(coverage.complete, 1);
+});
+
+test('an ACK without queryable storage is not counted as complete coverage', async (t) => {
+  const { archive, plan } = await replicationFixture(t, [another], [{ url: RELAYS[0], ids: [] }]);
+  t.mock.method(globalThis, 'WebSocket', function () {
+    return new FakeSocket((message, ws) => {
+      if (message[0] === 'EVENT') ws.receive(['OK', message[1].id, true, '']);
+      if (message[0] === 'REQ') ws.receive(['EOSE', message[1]]);
+    });
+  });
+  const { rows, coverage } = await publish(archive, plan, options);
+  assert.equal(rows[0].accepted, 1);
+  assert.equal(rows[0].verified, 0);
+  assert.equal(coverage.complete, 0);
+});
+
+test('policy rejection is recorded without reconnecting or failing the whole job', async (t) => {
+  const { archive, plan } = await replicationFixture(t, [another], [{ url: RELAYS[0], ids: [] }]);
+  let connections = 0;
+  t.mock.method(globalThis, 'WebSocket', function () {
+    connections++;
+    return new FakeSocket((message, ws) => {
+      if (message[0] === 'EVENT') ws.receive(['OK', message[1].id, false, 'blocked: old event']);
+      if (message[0] === 'REQ') ws.receive(['EOSE', message[1]]);
+    });
+  });
+  const { rows } = await publish(archive, plan, options);
+  assert.equal(connections, 1);
+  assert.equal(rows[0].rejected, 1);
+  assert.equal(rows[0].lastRejection, 'blocked: old event');
+});
+
+test('NIP-11 authentication and payment policies are respected before opening a socket', async (t) => {
+  const { archive, plan } = await replicationFixture(t, [removal], []);
+  t.mock.method(globalThis, 'fetch', async () => ({ ok: true, json: async () => ({ limitation: { payment_required: true } }) }));
+  t.mock.method(globalThis, 'WebSocket', function () { assert.fail('must not connect to a paid relay'); });
+  await assert.rejects(collect(archive, plan, options), /No relay completed/);
+  assert.deepEqual(JSON.parse(await readFile(archive, 'utf8')).events, [removal]);
+});
+
+test('invalid destinations fail before any relay writes', async (t) => {
+  const { archive, plan } = await replicationFixture(t, [another], [{ url: 'wss://unconfigured.example', ids: [] }]);
+  t.mock.method(globalThis, 'WebSocket', function () { assert.fail('must not connect'); });
+  await assert.rejects(publish(archive, plan, options), /Invalid replication destinations/);
 });
