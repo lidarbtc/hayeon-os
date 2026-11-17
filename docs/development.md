@@ -29,6 +29,37 @@ It writes `public/music/<id>.mid` and updates `src/lib/os/music.json`. The trans
 
 To hide a note, add its event ID (shown in the tooltip on its timestamp) or the author's public key to `src/lib/os/guestbook-blocked.json` and redeploy.
 
+New guestbook notes and their empty replacement events (removals) include a `client` tag naming HaYeon OS and `r` tags linking to the site and source repository. These tags are included before proof of work and signing, so project information stays with the event when it is forwarded. They identify the project for readers and relay operators; they do not guarantee retention or prove the event came from the official client. Existing events remain valid without these tags and must be forwarded unchanged. The client tag names the app only; it does not reference a separately published NIP-89 handler.
+
+[`guestbook-event.example.json`](guestbook-event.example.json) shows a complete WebSocket `EVENT` message generated with the app's signing code and a disposable key. Its signature and 16-bit proof of work are valid. It is an offline example and has not been published to any relay. The `nonce` is the proof-of-work counter; `id` is the SHA-256 event hash, and `sig` is the author's Schnorr signature. Deleting a note sends the same kind and `d` tag with a newer timestamp and empty content, keeping the project tags and omitting the proof-of-work nonce.
+
+## Guestbook backup and replication
+
+`.github/workflows/guestbook-sync.yml` runs at minute 37 of every hour, or manually through **Actions → Back up and replicate the guestbook → Run workflow**. The schedule starts once the workflow is on the default branch; GitHub may delay scheduled runs and disables schedules in public repositories after 60 days without repository activity.
+
+The job uses Node 24 and the existing cryptography dependencies. It needs no visitor private keys or external secrets. Its built-in `GITHUB_TOKEN` has `contents: write` to maintain a separate `guestbook-backup` branch. Branch rules must permit that write. The backup branch has no workflow or application source, so backup commits do not deploy the site.
+
+1. Query all five relays from `src/lib/os/guestbook-config.ts`, paging backward through `kind:30078` events tagged `hayeon-os-guestbook` and waiting for `EOSE` on each query. The reader uses a maximum page size of 100, reduced by advertised NIP-11 limits, and fetches each boundary second separately. Saturated boundaries fail visibly rather than silently skipping records. Undisclosed relay caps or omitted query results can still make a relay's history incomplete.
+2. Validate signatures, the topic and the app's 16-bit proof of work (empty removals need no PoW). Merge valid completed snapshots with `guestbook-backup/events.json`, keeping the latest event per `(pubkey, kind, d)`, including empty removal events. Equal timestamps use the lowest event ID, matching NIP-01 and the browser. A missing or failed relay response never deletes an archived record. A malformed backup or failure of every source aborts collection.
+3. Commit and push the backup **before** sending any events. A failed push prevents replication. Only changed data creates a commit. The public backup contains public signed events, never visitor private keys. It is not subject to Actions artifact expiration. Replacing a note with an empty event removes its body from the current snapshot, but earlier Git history may still contain it.
+4. Send the unchanged latest events only to relays that completed collection and lack those IDs. Skip notes blocked by the site's moderation list, propagate removals first, and wait for each relay's `OK`. Send at most 500 events per relay per run, with a 250 ms pause between sends. Rejected and unavailable copies can be retried on the next scheduled run; missing ACKs are failures, not successful writes.
+
+The Actions summary lists collection and replication counts and failures per relay. One unavailable relay does not stop backup from the others. Observed deletion events are retained permanently in the current snapshot so stale copies cannot replace them. A deletion that exists only on an unreachable relay cannot be discovered until that relay returns. A relay ACK confirms acceptance, not permanent storage. The backup is for recovery/replication; the website still reads from its configured relays.
+
+Read-only collection (writes local files, sends no events):
+
+```sh
+node scripts/sync-guestbook.mjs collect --archive /tmp/guestbook-events.json --plan /tmp/guestbook-plan.json
+```
+
+After durably saving that archive, publish its missing events using the fresh plan (valid for 30 minutes):
+
+```sh
+node scripts/sync-guestbook.mjs publish --archive /tmp/guestbook-events.json --plan /tmp/guestbook-plan.json
+```
+
+Run `node --test scripts/sync-guestbook.test.mjs` for offline tests of signatures, deletion handling, pagination, relay failures, and backup-to-relay recovery.
+
 ## Releases and gateways
 
 4EVERLAND builds and publishes every push to `main` under an IPNS name, and the site is reached through eth.limo and eth.link.

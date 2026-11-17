@@ -1,0 +1,46 @@
+[
+  "EVENT",
+  {
+    "pubkey": "983669fdd94d33230e1bbc8f4420a40edaac901e84065fc634b15fd8a8b8172c",
+    "created_at": 1794919228,
+    "kind": 30078,
+    "tags": [
+      [
+        "d",
+        "hayeon-os-guestbook:0123456789ab"
+      ],
+      [
+        "t",
+        "hayeon-os-guestbook"
+      ],
+      [
+        "name",
+        "현재"
+      ],
+      [
+        "color",
+        "mint"
+      ],
+      [
+        "client",
+        "HaYeon OS"
+      ],
+      [
+        "r",
+        "https://hayeon.eth.link"
+      ],
+      [
+        "r",
+        "https://github.com/lidarbtc/hayeon-os"
+      ],
+      [
+        "nonce",
+        "152142",
+        "16"
+      ]
+    ],
+    "content": "하연 OS 잘 보고 갑니다! 🦔",
+    "id": "0000163750c25ef13a735b648fa6b7a2377bb319b13f3f9442e0a608695868ba",
+    "sig": "dddfc2ea0b6f8dbd8d7e02dd55ec7e22e04e3dfb88101d15356ecf836c100e1881b8eff2d8e3380229e43184231416e8b6f3ee4ebba1e4c02db52eb7818bb206"
+  }
+]
