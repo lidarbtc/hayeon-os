@@ -267,18 +267,28 @@ export async function publish(archivePath, planPath, { relays = SYNC_RELAYS, sle
       // Keep acknowledged progress on reconnect; only the unacknowledged event
       // may be sent again, still with its original ID and signature.
       let cursor = 0;
+      let paused = false;
       events.sort((a, b) => Number(!!a.content) - Number(!!b.content));
       const batch = events.slice(0, MAX_PUBLISH_PER_RELAY);
       result.deferred = events.length - batch.length;
       try {
         await withRelay(snapshot.url, async (relay, attempts) => {
           result.attempts = attempts;
-          while (cursor < batch.length) {
+          while (cursor < batch.length && !paused) {
             const ack = await relay.publish(batch[cursor]);
             if (ack.accepted) result.accepted++;
-            else { result.rejected++; result.lastRejection = ack.reason; }
+            else {
+              result.rejected++;
+              result.lastRejection = ack.reason;
+              // Respect relay-wide refusals instead of sending the rest of a
+              // backlog into a rate limit, authentication gate, or full disk.
+              if (/^(rate-limited:|banned:|auth-required:|restricted:)|rate[- ]limit|permission to write|NIP-05|no space left on device/i.test(ack.reason)) {
+                paused = true;
+                result.paused = ack.reason;
+              }
+            }
             cursor++;
-            await sleep(250);
+            await sleep(1000);
           }
           // An OK is not evidence that a query can retrieve the event. Count
           // coverage using readback, not connections or ACKs alone.
@@ -286,6 +296,7 @@ export async function publish(archivePath, planPath, { relays = SYNC_RELAYS, sle
           result.verified = desired.filter((event) => stored.has(event.id)).length;
         }, { sleep });
       } catch (error) { result.error = error.message; }
+      result.deferred = events.length - cursor;
     }
     result.remaining = result.expected - result.verified;
     result.complete = result.remaining === 0;

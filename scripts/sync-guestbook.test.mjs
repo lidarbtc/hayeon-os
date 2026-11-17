@@ -297,6 +297,26 @@ test('policy rejection is recorded without reconnecting or failing the whole job
   assert.equal(rows[0].lastRejection, 'blocked: old event');
 });
 
+test('rate limiting pauses the backlog and defers remaining original events', async (t) => {
+  const { archive, plan } = await replicationFixture(t, [removal, another], [{ url: RELAYS[0], ids: [] }]);
+  const sent = [];
+  t.mock.method(globalThis, 'WebSocket', function () {
+    return new FakeSocket((message, ws) => {
+      if (message[0] === 'EVENT') {
+        sent.push(message[1]);
+        ws.receive(['OK', message[1].id, false, 'rate-limited: slow down']);
+      }
+      if (message[0] === 'REQ') ws.receive(['EOSE', message[1]]);
+    });
+  });
+  const { rows } = await publish(archive, plan, options);
+  assert.deepEqual(sent, [removal]);
+  assert.equal(rows[0].rejected, 1);
+  assert.equal(rows[0].deferred, 1);
+  assert.equal(rows[0].paused, 'rate-limited: slow down');
+  assert.deepEqual(JSON.parse(await readFile(archive, 'utf8')).events, [removal, another]);
+});
+
 test('NIP-11 authentication and payment policies are respected before opening a socket', async (t) => {
   const { archive, plan } = await replicationFixture(t, [removal], []);
   t.mock.method(globalThis, 'fetch', async () => ({ ok: true, json: async () => ({ limitation: { payment_required: true } }) }));
