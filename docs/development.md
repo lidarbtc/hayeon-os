@@ -29,6 +29,10 @@ It writes `public/music/<id>.mid` and updates `src/lib/os/music.json`. The trans
 
 To hide a note, add its event ID (shown in the tooltip on its timestamp) or the author's public key to `src/lib/os/guestbook-blocked.json` and redeploy.
 
+New guestbook notes and their empty replacement events (removals) include a `client` tag naming HaYeon OS and `r` tags linking to the site and source repository. These tags are included before proof of work and signing, so project information stays with the event when it is forwarded. They identify the project for readers and relay operators; they do not guarantee retention or prove the event came from the official client. Existing events remain valid without these tags and must be forwarded unchanged. The client tag names the app only; it does not reference a separately published NIP-89 handler.
+
+[`guestbook-event.example.json`](guestbook-event.example.json) shows a complete WebSocket `EVENT` message generated with the app's signing code and a disposable key. Its signature and 16-bit proof of work are valid. It is an offline example and has not been published to any relay. The `nonce` is the proof-of-work counter; `id` is the SHA-256 event hash, and `sig` is the author's Schnorr signature. Deleting a note sends the same kind and `d` tag with a newer timestamp and empty content, keeping the project tags and omitting the proof-of-work nonce.
+
 ## Releases and gateways
 
 4EVERLAND builds and publishes every push to `main` under an IPNS name, and the site is reached through eth.limo and eth.link.

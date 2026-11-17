@@ -1,4 +1,5 @@
 export const REPO_URL = 'https://github.com/lidarbtc/hayeon-os';
+export const SITE_URL = 'https://hayeon.eth.link';
 /** The owner's directory of tripleS fan sites. */
 export const TRIPLES_URL = 'https://triples.love';
 /** Another fan's archive of HaYeon: photos and translated Cosmo talks. */

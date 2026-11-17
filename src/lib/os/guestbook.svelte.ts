@@ -2,6 +2,7 @@
 // relays, so there is still no server of our own and nothing costs anything.
 // Every visitor gets a throwaway key that lives in localStorage.
 import { t } from './i18n';
+import { REPO_URL, SITE_URL } from './about';
 
 import blockList from './guestbook-blocked.json';
 import type { NostrEvent, Pool } from './nostr';
@@ -25,6 +26,12 @@ const KIND_NOTE = 30078;
 const KIND_HERE = 21019;
 const TOPIC = 'hayeon-os-guestbook';
 const HERE = 'hayeon-os-here';
+// Keep project links in the signed event, so they survive relay-to-relay forwarding.
+const APP_TAGS = [
+  ['client', 'HaYeon OS'],
+  ['r', SITE_URL],
+  ['r', REPO_URL]
+];
 /** Zero bits every note must show. About a quarter of a second of work for a visitor, tiresome for a spammer. */
 const POW = 16;
 
@@ -230,7 +237,8 @@ class Guestbook {
         ['d', TOPIC + ':' + this.#nostr.randomId()],
         ['t', TOPIC],
         ['name', this.name],
-        ['color', color]
+        ['color', color],
+        ...APP_TAGS
       ];
       const event = await this.#nostr.build(this.#secret, KIND_NOTE, tags, body, POW);
       if (!(await this.#pool.publish(event))) return t('릴레이가 쪽지를 받지 않았습니다. 다시 눌러 주세요.', 'Your note didn’t go through. Please try again.');
@@ -244,7 +252,7 @@ class Guestbook {
   /** Take down one of our own notes by replacing it with an empty one. */
   async remove(note: Note) {
     if (note.pubkey !== this.me || !this.#nostr || !this.#pool || !this.#secret) return;
-    const event = await this.#nostr.build(this.#secret, KIND_NOTE, [['d', note.slot], ['t', TOPIC]], '');
+    const event = await this.#nostr.build(this.#secret, KIND_NOTE, [['d', note.slot], ['t', TOPIC], ...APP_TAGS], '');
     // created_at has one-second steps; a removal in the same second as the note would lose the tie.
     if (event.created_at * 1000 <= note.at) return;
     if (await this.#pool.publish(event)) this.#accept(event);
