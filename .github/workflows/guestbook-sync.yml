@@ -1,6 +1,14 @@
 name: Back up and replicate the guestbook
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/guestbook-sync.yml'
+      - 'scripts/sync-guestbook*'
+      - 'scripts/guestbook-relays.json'
+      - 'src/lib/os/guestbook-config.ts'
+      - 'src/lib/os/guestbook-blocked.json'
   schedule:
     - cron: '37 * * * *'
   workflow_dispatch:
