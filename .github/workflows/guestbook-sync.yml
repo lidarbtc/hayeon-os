@@ -1,0 +1,59 @@
+name: Back up and replicate the guestbook
+
+on:
+  schedule:
+    - cron: '37 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: guestbook-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set temporary paths
+        run: |
+          echo "BACKUP_DIR=$RUNNER_TEMP/guestbook-backup" >> "$GITHUB_ENV"
+          echo "SYNC_PLAN=$RUNNER_TEMP/guestbook-sync-plan.json" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - name: Install locked dependencies
+        run: |
+          npm install --global pnpm@11.25.0
+          pnpm install --frozen-lockfile
+      - name: Check replication behavior
+        run: node --test scripts/sync-guestbook.test.mjs
+      - name: Open the backup branch
+        shell: bash
+        run: |
+          if git ls-remote --exit-code --heads origin refs/heads/guestbook-backup > /dev/null; then
+            git fetch origin refs/heads/guestbook-backup
+            git worktree add --detach "$BACKUP_DIR" FETCH_HEAD
+            test -f "$BACKUP_DIR/events.json"
+          else
+            status=$?
+            if [ "$status" -ne 2 ]; then exit "$status"; fi
+            git worktree add --detach "$BACKUP_DIR" HEAD
+            git -C "$BACKUP_DIR" switch --orphan guestbook-backup
+          fi
+      - name: Collect signed events (no relay writes)
+        run: node scripts/sync-guestbook.mjs collect --archive "$BACKUP_DIR/events.json" --plan "$SYNC_PLAN"
+      - name: Save the backup before replication
+        run: |
+          git -C "$BACKUP_DIR" config user.name 'github-actions[bot]'
+          git -C "$BACKUP_DIR" config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C "$BACKUP_DIR" add events.json
+          if ! git -C "$BACKUP_DIR" diff --cached --quiet; then
+            git -C "$BACKUP_DIR" commit -m 'Back up signed guestbook events'
+            git -C "$BACKUP_DIR" push origin HEAD:refs/heads/guestbook-backup
+          fi
+      - name: Replicate missing events without changing their signatures
+        run: node scripts/sync-guestbook.mjs publish --archive "$BACKUP_DIR/events.json" --plan "$SYNC_PLAN"
