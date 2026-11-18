@@ -33,6 +33,49 @@
       ]
     },
     {
+      "content": "하요이ɞ",
+      "created_at": 1794964302,
+      "id": "0000bbe9119790baecaccf72bbb324fa452c3ccee6e5699332a4fc529a2fc7dd",
+      "kind": 30078,
+      "pubkey": "1b52ef9f7fa7f5eaca4a81b47a0bc892292d4304eb9762d053677c9e25838cd3",
+      "sig": "1e1a7cb466659ec5b72b6c77669bd282ac861c3fb2b476781680cf0890a0b5b114f9ba1e75766c53bdad8339f3a8be5652e61082d9793e3fbc1d9e89ed959f39",
+      "tags": [
+        [
+          "d",
+          "hayeon-os-guestbook:31d077abd1d5"
+        ],
+        [
+          "t",
+          "hayeon-os-guestbook"
+        ],
+        [
+          "name",
+          ""
+        ],
+        [
+          "color",
+          "sky"
+        ],
+        [
+          "client",
+          "HaYeon OS"
+        ],
+        [
+          "r",
+          "https://hayeon.eth.link"
+        ],
+        [
+          "r",
+          "https://github.com/lidarbtc/hayeon-os"
+        ],
+        [
+          "nonce",
+          "33279",
+          "16"
+        ]
+      ]
+    },
+    {
       "content": "정하연 두배 이벤트 또 언제해여 ?",
       "created_at": 1794750579,
       "id": "000017b5087f67b664c8ee5c662b732b735a885f1c2a627f20135014800f7c2e",
