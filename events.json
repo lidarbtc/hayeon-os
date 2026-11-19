@@ -582,6 +582,49 @@
       ]
     },
     {
+      "content": "noshi was here :)",
+      "created_at": 1795046354,
+      "id": "0000d1c518a8bdee87008129657f810d17230e37307e217c7c3c377f11fdac9e",
+      "kind": 30078,
+      "pubkey": "c19491c928014cfb7eb04341e56ad61c069f38a4b87ca014f1ee7dcea9b70add",
+      "sig": "4e9e779e482eca7e2719bad08d7ea70ef752aeb4b7154f6c4ad8783cbcf5aa51205c4dd2d2475505bdd033389a0feae4c75a08c3524730c4d753713b79975178",
+      "tags": [
+        [
+          "d",
+          "hayeon-os-guestbook:fd2d47368600"
+        ],
+        [
+          "t",
+          "hayeon-os-guestbook"
+        ],
+        [
+          "name",
+          "noshi"
+        ],
+        [
+          "color",
+          "lilac"
+        ],
+        [
+          "client",
+          "HaYeon OS"
+        ],
+        [
+          "r",
+          "https://hayeon.eth.link"
+        ],
+        [
+          "r",
+          "https://github.com/lidarbtc/hayeon-os"
+        ],
+        [
+          "nonce",
+          "38059",
+          "16"
+        ]
+      ]
+    },
+    {
       "content": "hayeon ⸜(｡˃ ᵕ ˂ )⸝♡",
       "created_at": 1794750094,
       "id": "00004d558564ed305b9f2e17248fe270aeadc92edd95a55657d67696527f6a85",
