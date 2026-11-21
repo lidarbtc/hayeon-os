@@ -138,6 +138,49 @@
       ]
     },
     {
+      "content": "하요이 ㄱㅇㅇ",
+      "created_at": 1795232111,
+      "id": "0000167306ba24b366586ab66ae4f11c2edae022071bc754b487dbd3fca257aa",
+      "kind": 30078,
+      "pubkey": "41b716c528a929a24646801bd513da5382b6ea3e5ff5fb7448b2758cf4ba140a",
+      "sig": "dfc3d1e7c3c39d5a181aea69c39dd6a439b90fdcfbd5d525854769aa3c3996160d31159ac6a80be9a389b0c56b58555781d9521eb398c17ede6d846018d8926a",
+      "tags": [
+        [
+          "d",
+          "hayeon-os-guestbook:2e909a4d0226"
+        ],
+        [
+          "t",
+          "hayeon-os-guestbook"
+        ],
+        [
+          "name",
+          "나"
+        ],
+        [
+          "color",
+          "sky"
+        ],
+        [
+          "client",
+          "HaYeon OS"
+        ],
+        [
+          "r",
+          "https://hayeon.eth.link"
+        ],
+        [
+          "r",
+          "https://github.com/lidarbtc/hayeon-os"
+        ],
+        [
+          "nonce",
+          "30106",
+          "16"
+        ]
+      ]
+    },
+    {
       "content": "",
       "created_at": 1794666294,
       "id": "e52bcd211327ef72454d805141db3381bb11ef34cdb558dcb994ef3556d44633",
