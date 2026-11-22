@@ -31,12 +31,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: tools/ipns-refresh/go.mod
           cache-dependency-path: tools/ipns-refresh/go.sum
+
+      - name: Build the IPNS refresh tool
+        working-directory: tools/ipns-refresh
+        run: go build -mod=readonly -o "$RUNNER_TEMP/ipns-refresh" .
 
       - name: Spread the newest record to the peers nearest to the name
         working-directory: tools/ipns-refresh
@@ -49,7 +53,7 @@ jobs:
           if [ "$GITHUB_EVENT_NAME" = push ] && [ -n "$PUSHED_AT" ]; then
             after=(-published-after "$(date -u -d "@$PUSHED_AT" +%Y-%m-%dT%H:%M:%SZ)")
           fi
-          go run . -name "$IPNS_NAME" "${after[@]}" 2>&1 | grep -v -i -e warn -e resource || true
+          "$RUNNER_TEMP/ipns-refresh" -name "$IPNS_NAME" "${after[@]}" 2>&1 | grep -v -i -e warn -e resource || true
 
       - name: Ask both gateways for every file
         run: |
