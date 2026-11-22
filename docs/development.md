@@ -64,6 +64,12 @@ Run `node --test scripts/sync-guestbook.test.mjs` for offline tests of signature
 
 4EVERLAND builds and publishes every push to `main` under an IPNS name, and the site is reached through eth.limo and eth.link.
 
+The Vite preset uses Node.js 24.x, runs `npm run build`, and publishes `dist/`. Its install command uses the pnpm version pinned in `package.json`.
+
+```sh
+npm exec --yes --package="$(node -p 'require("./package.json").packageManager')" -- pnpm install --frozen-lockfile
+```
+
 4EVERLAND stores each new IPNS record on only some of the DHT peers nearest to the name. The others keep older records until they expire a day later, and the gateways sometimes serve the old release from them. `tools/ipns-refresh` crawls the DHT, takes the newest signed record from the nearest peers and stores it on the ones that lack it. `.github/workflows/warm.yml` runs it after each release and every six hours, then requests every file through both gateways.
 
 To run it by hand (needs Go):

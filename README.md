@@ -15,7 +15,7 @@ A Windows XP/7-style web desktop for tripleS HaYeon.
 
 ## Development
 
-Use Node.js 26.13.1 and pnpm 12.22.0.
+Use Node.js 26.13.1 and pnpm 12.22.0 for local development. The production build runs on Node.js 24.x.
 
 ```sh
 pnpm install --frozen-lockfile
