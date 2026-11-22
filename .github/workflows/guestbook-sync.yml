@@ -25,17 +25,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Set temporary paths
         run: |
           echo "BACKUP_DIR=$RUNNER_TEMP/guestbook-backup" >> "$GITHUB_ENV"
           echo "SYNC_PLAN=$RUNNER_TEMP/guestbook-sync-plan.json" >> "$GITHUB_ENV"
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         with:
-          node-version: '24'
+          node-version-file: '.node-version'
       - name: Install locked dependencies
         run: |
-          npm install --global pnpm@11.25.0
+          npm install --global "$(node -p 'require("./package.json").packageManager')"
           pnpm install --frozen-lockfile
       - name: Check replication behavior
         run: node --test scripts/sync-guestbook.test.mjs

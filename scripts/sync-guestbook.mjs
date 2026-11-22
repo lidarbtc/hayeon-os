@@ -1,4 +1,4 @@
-// Node 24: native WebSocket and TypeScript stripping; no signing key is needed.
+// Syncs already-signed events using Node's native WebSocket and TypeScript support.
 import { readFile, writeFile, rename, appendFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';

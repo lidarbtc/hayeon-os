@@ -1,6 +1,6 @@
 # Development notes
 
-Run `pnpm check` for type checks and `pnpm build` to build the static site into `dist/`.
+Run `pnpm check` to check Svelte components with TypeScript 6 and 7. The Svelte checker loads TypeScript 6 itself and uses the `@typescript/native` alias for its TypeScript 7 pass. Run `pnpm build` to build the static site into `dist/`.
 
 ## Photos
 
@@ -37,7 +37,7 @@ New guestbook notes and their empty replacement events (removals) include a `cli
 
 `.github/workflows/guestbook-sync.yml` runs at minute 37 of every hour, when its scripts/configuration change on `main`, or manually through **Actions → Back up and replicate the guestbook → Run workflow**. The schedule starts once the workflow is on the default branch; GitHub may delay scheduled runs and disables schedules in public repositories after 60 days without repository activity.
 
-The job uses Node 24 and the existing cryptography dependencies. It needs no visitor private keys or external secrets. Its built-in `GITHUB_TOKEN` has `contents: write` to maintain a separate `guestbook-backup` branch. Branch rules must permit that write. The backup branch has no workflow or application source, so backup commits do not deploy the site.
+The job reads its Node.js version from `.node-version` and its pnpm version from `package.json`. It uses the app's cryptography dependencies. It needs no visitor private keys or external secrets. Its built-in `GITHUB_TOKEN` has `contents: write` to maintain a separate `guestbook-backup` branch. Branch rules must permit that write. The backup branch has no workflow or application source, so backup commits do not deploy the site.
 
 1. Query the browser's five relays from `src/lib/os/guestbook-config.ts` plus the additional candidates in `scripts/guestbook-relays.json`, with up to eight simultaneous connections. The separate list expands scheduled replication without opening dozens of connections on visitors' devices. Candidates come from public relay directories and advertised NIP-65 relay lists; their presence in the list is not evidence of availability or storage. Before connecting, skip relays that advertise authentication, payment, or restricted writes in NIP-11. Page backward through `kind:30078` events tagged `hayeon-os-guestbook`, waiting for `EOSE` on each query. The reader uses a maximum page size of 100, reduced by advertised NIP-11 limits, and fetches each boundary second separately. Saturated boundaries fail visibly rather than silently skipping records. Undisclosed relay caps or omitted query results can still make a relay's history incomplete.
 2. Validate signatures, the topic and the app's 16-bit proof of work (empty removals need no PoW). Merge valid completed snapshots with `guestbook-backup/events.json`, keeping the latest event per `(pubkey, kind, d)`, including empty removal events. Equal timestamps use the lowest event ID, matching NIP-01 and the browser. A missing or failed relay response never deletes an archived record. A malformed backup or failure of every source aborts collection.
