@@ -168,7 +168,7 @@ def transcribe(pitch_model, y, lo, hi, onset=0.5, frame=0.3, shortest=90):
     import soundfile
     from basic_pitch.inference import predict
 
-    with tempfile.NamedTemporaryFile(suffix='.wav', dir='/tmp') as tmp:
+    with tempfile.NamedTemporaryFile(suffix='.wav') as tmp:
         soundfile.write(tmp.name, resample(y, 22050), 22050)
         _, _, events = predict(
             tmp.name, pitch_model, onset_threshold=onset, frame_threshold=frame,
@@ -505,14 +505,17 @@ def main():
         sys.exit('No mp3 files found.')
 
     import torch
-    from basic_pitch import ICASSP_2022_MODEL_PATH
+    from basic_pitch import FilenameSuffix, build_icassp_2022_model_path
     from basic_pitch.inference import Model
     from demucs.pretrained import get_model
 
     torch.set_num_threads(os.cpu_count() or 4)
     demucs_model = get_model('htdemucs')
     demucs_model.eval()
-    pitch_model = Model(ICASSP_2022_MODEL_PATH)
+    pitch_path = build_icassp_2022_model_path(FilenameSuffix.onnx)
+    pitch_model = Model(pitch_path)
+    if pitch_model.model_type != Model.MODEL_TYPES.ONNX:
+        raise RuntimeError(f'Basic Pitch selected {pitch_model.model_type.name} for {pitch_path}. ONNX is required.')
 
     OUT.mkdir(parents=True, exist_ok=True)
     index = {entry['id']: entry for entry in (json.loads(INDEX.read_text()) if INDEX.exists() else [])}

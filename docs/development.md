@@ -4,7 +4,7 @@ Run `pnpm check` to check Svelte components with TypeScript 6 and 7. The Svelte 
 
 ## Photos
 
-Requires ImageMagick 7.
+Use ImageMagick 7.1.2-36 with `magick` on `PATH`.
 
 1. Put images in `photos/inbox/` (git-ignored).
 2. Run `pnpm photos`. It writes resized images and thumbnails to `public/photos/` and adds entries to `src/lib/os/photos.json`.
@@ -14,15 +14,15 @@ Optional fields: `focus` sets the CSS `object-position` for cropped photos; `ava
 
 ## Music
 
-Requires ffmpeg and a Python environment with `torch`, `demucs`, `basic-pitch` (ONNX), `librosa`, `mido` and `soundfile`.
+Install uv and put FFmpeg 9.1 on `PATH`. The locked CPU environment in `scripts/music-env` uses CPython 3.11.18 on Linux x86_64. The first run downloads the Python packages and the Demucs weights.
 
 Use the folder layout `<year> [<unit> - ]<album>/<nn> - <title>.mp3`.
 
 ```sh
-python scripts/music.py ~/Music/songs
+uv run --project scripts/music-env --locked python scripts/music.py ~/Music/songs
 ```
 
-The script uses Demucs and Basic Pitch to transcribe recordings into MIDI.
+The script separates each recording with Demucs and transcribes it with Basic Pitch's ONNX model.
 It writes `public/music/<id>.mid` and updates `src/lib/os/music.json`. The transcription is automatic and imperfect.
 
 ## Guestbook moderation
